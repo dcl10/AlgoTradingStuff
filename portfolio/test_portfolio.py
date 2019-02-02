@@ -6,10 +6,32 @@ from .portfolio import Portfolio, BaseHolding
 class TestPortfolio(unittest.TestCase):
 
     def setUp(self):
-        self.portfolio = Portfolio('MyPortfolio', 1000)
+        self.portfolio = Portfolio('MyPortfolio', pot=1000)
 
     def tearDown(self):
         del self.portfolio
+
+    def test_add_remove(self):
+        self.portfolio.add_holdings(BaseHolding('aapl', 10, 100))
+        self.assertEqual(1, len(self.portfolio.holdings))
+        self.assertRaises(AssertionError, self.portfolio.add_holdings, 1, 'hi', True, {'key': 'value'})
+        self.portfolio.add_holdings(**{'msft': BaseHolding('msft', 10, 5)})
+        self.assertEqual(2, len(self.portfolio.holdings))
+        self.portfolio.remove_holdings('aapl')
+        self.assertEqual(1, len(self.portfolio.holdings))
+        self.assertRaises(KeyError, self.portfolio.remove_holdings, 'tesla')
+
+    def test_allocate(self):
+        self.portfolio.holdings.update({'aapl': BaseHolding('aapl', current_price=10)})
+        self.portfolio.allocate('aapl', 100)
+        self.assertEqual(100, self.portfolio.holdings['aapl'].balance)
+        self.assertEqual(900, self.portfolio.pot)
+        self.assertRaises(AssertionError, self.portfolio.allocate, 'aapl', 2000)
+
+    def test_deallocate(self):
+        self.portfolio.holdings.update({'aapl': BaseHolding('aapl', current_price=10, n_units=100)})
+        self.portfolio.deallocate('aapl', 500)
+        self.assertEqual(1500, self.portfolio.pot)
 
 
 class TestBaseHolding(unittest.TestCase):

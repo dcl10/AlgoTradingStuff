@@ -9,13 +9,10 @@ class Portfolio:
     def current_value(self):
         return sum([h.balance for h in self.holdings])
 
-    @property
-    def returns(self):
-        return self.current_value / self.pot
-
     def add_holdings(self, *args, **kwargs):
         if args:
             for arg in args:
+                assert isinstance(arg, BaseHolding), 'You can only add instances of BaseHolding and its subclasses'
                 self.holdings.update({arg.name: arg})
         if kwargs:
             self.holdings.update(**kwargs)
@@ -24,8 +21,24 @@ class Portfolio:
         for arg in args:
             del self.holdings[arg]
 
-    def allocate(self, holding, amount):
-        self.holdings[holding].pot += amount
+    def allocate(self, holding, amount, buy_units=False):
+        if buy_units:
+            assert self.pot >= (self.holdings[holding].current_price * amount), 'You cannot allocate more funds than ' \
+                                                                                'are in your portfolio\'s pot'
+            self.holdings[holding].buy(n_units=amount)
+            self.pot -= (self.holdings[holding].current_price * amount)
+        else:
+            assert self.pot >= amount, 'You cannot allocate more funds than are in your portfolio\'s pot'
+            self.holdings[holding].buy(amount=amount)
+            self.pot -= amount
+
+    def deallocate(self, holding, amount, sell_units=False):
+        if sell_units:
+            self.holdings[holding].sell(n_units=amount)
+            self.pot += (self.holdings[holding].current_price * amount)
+        else:
+            self.holdings[holding].sell(amount=amount)
+            self.pot += amount
 
 
 class BaseHolding:
