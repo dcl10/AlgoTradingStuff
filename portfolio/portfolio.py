@@ -30,35 +30,33 @@ class Portfolio:
 
 class BaseHolding:
 
-    def __init__(self, name, n_units=0):
+    def __init__(self, name, n_units=0.0, current_price=0.0):
         self.name = name
-        self.current_price = self.get_current_price()
+        self.current_price = current_price
         self.n_units = n_units
 
     @property
     def balance(self):
         return self.current_price * self.n_units
 
-    def get_current_price(self):
-        return 0.0  # TODO replace with call to quandl API
-
-    def buy(self, n_units=None, amount=None):
-        if n_units is not None:
+    def buy(self, n_units=0.0, amount=0.0):
+        assert isinstance(n_units, (float, int)), 'n_units must be a float or int'
+        assert isinstance(amount, (float, int)), 'amount must be a float or int'
+        if n_units != 0.0:
             self.n_units += n_units
-        elif amount is not None:
-            self.n_units += amount / self.current_price
+        elif amount != 0.0:
+            self.n_units += (amount / self.current_price)
         else:
             raise TypeError('You must specify either the number of units (n_units) or the amount (amount) '
                             'that you wish to purchase.')
 
-    def sell(self, n_units=None, amount=None):
-        if n_units is not None:
+    def sell(self, n_units=0.0, amount=0.0):
+        assert isinstance(n_units, (float, int)), 'n_units must be a float or int'
+        assert isinstance(amount, (float, int)), 'amount must be a float or int'
+        if n_units != 0.0:
             self.n_units -= n_units
-        elif amount is not None:
+        elif amount != 0.0:
             self.n_units -= amount / self.current_price
         else:
             raise TypeError('You must specify either the number of units (n_units) or the amount (amount) '
                             'that you wish to purchase.')
-
-    def update(self):
-        pass
