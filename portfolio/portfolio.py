@@ -1,3 +1,6 @@
+import abc
+
+
 class Portfolio:
 
     def __init__(self, name, pot=0.0):
@@ -41,7 +44,7 @@ class Portfolio:
             self.pot += amount
 
 
-class BaseHolding:
+class BaseHolding(abc.ABC):
 
     def __init__(self, name, n_units=0.0, current_price=0.0):
         self.name = name
@@ -49,27 +52,57 @@ class BaseHolding:
         self.n_units = n_units
 
     @property
+    @abc.abstractmethod
     def balance(self):
-        return self.current_price * self.n_units
+        pass
+
+    @abc.abstractmethod
+    def buy(self, n_units=0.0, amount=0.0):
+        pass
+
+    @abc.abstractmethod
+    def sell(self, n_units=0.0, amount=0.0):
+        pass
+
+
+class ForexHolding(BaseHolding):
+    """This class handles currency exchanges."""
+
+    @property
+    def balance(self):
+        """Return the value of this holding in your native currency."""
+        return self.n_units / self.current_price
 
     def buy(self, n_units=0.0, amount=0.0):
-        assert isinstance(n_units, (float, int)), 'n_units must be a float or int'
-        assert isinstance(amount, (float, int)), 'amount must be a float or int'
+        """
+        Buy foreign currency.
+
+        :param n_units: The amount of foreign currency (in that currency) to buy.
+        :param amount: The amount of native currency to convert to foreign currency.
+        :raise ValueError: Raised if both n_units and amount are 0.0 (default values), else n_units takes priority.
+        :return:
+        """
         if n_units != 0.0:
             self.n_units += n_units
         elif amount != 0.0:
-            self.n_units += (amount / self.current_price)
+            self.n_units += (amount * self.current_price)
         else:
-            raise TypeError('You must specify either the number of units (n_units) or the amount (amount) '
-                            'that you wish to purchase.')
+            raise ValueError('You must specify either the number of units (n_units) or the amount (amount) '
+                             'that you wish to purchase.')
 
     def sell(self, n_units=0.0, amount=0.0):
-        assert isinstance(n_units, (float, int)), 'n_units must be a float or int'
-        assert isinstance(amount, (float, int)), 'amount must be a float or int'
+        """
+        Sell foreign currency.
+
+        :param n_units: The amount of foreign currency you wish to convert back.
+        :param amount: The amount of native you wish to buy back.
+        :raise ValueError: Raised if both n_units and amount are 0.0 (default values), else n_units takes priority.
+        :return:
+        """
         if n_units != 0.0:
             self.n_units -= n_units
         elif amount != 0.0:
-            self.n_units -= amount / self.current_price
+            self.n_units -= (amount * self.current_price)
         else:
-            raise TypeError('You must specify either the number of units (n_units) or the amount (amount) '
-                            'that you wish to purchase.')
+            raise ValueError('You must specify either the number of units (n_units) or the amount (amount) '
+                             'that you wish to sell.')
