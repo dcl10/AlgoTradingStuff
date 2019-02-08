@@ -82,6 +82,8 @@ class ForexHolding(BaseHolding):
         :raise ValueError: Raised if both n_units and amount are 0.0 (default values), else n_units takes priority.
         :return:
         """
+        assert isinstance(n_units, (int, float))
+        assert isinstance(amount, (int, float))
         if n_units != 0.0:
             self.n_units += n_units
         elif amount != 0.0:
@@ -99,6 +101,8 @@ class ForexHolding(BaseHolding):
         :raise ValueError: Raised if both n_units and amount are 0.0 (default values), else n_units takes priority.
         :return:
         """
+        assert isinstance(n_units, (int, float))
+        assert isinstance(amount, (int, float))
         if n_units != 0.0:
             self.n_units -= n_units
         elif amount != 0.0:
