@@ -1,4 +1,5 @@
 import abc
+import math
 
 
 class Portfolio:
@@ -57,11 +58,11 @@ class BaseHolding(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def buy(self, n_units=0.0, amount=0.0):
+    def buy(self, n_units=0, amount=0):
         pass
 
     @abc.abstractmethod
-    def sell(self, n_units=0.0, amount=0.0):
+    def sell(self, n_units=0, amount=0):
         pass
 
 
@@ -73,7 +74,7 @@ class ForexHolding(BaseHolding):
         """Return the value of this holding in your native currency."""
         return self.n_units / self.current_price
 
-    def buy(self, n_units=0.0, amount=0.0):
+    def buy(self, n_units=0, amount=0):
         """
         Buy foreign currency.
 
@@ -82,8 +83,8 @@ class ForexHolding(BaseHolding):
         :raise ValueError: Raised if both n_units and amount are 0.0 (default values), else n_units takes priority.
         :return:
         """
-        assert isinstance(n_units, (int, float))
-        assert isinstance(amount, (int, float))
+        assert isinstance(n_units, (int, float)), 'n_units must be an int or a float'
+        assert isinstance(amount, (int, float)), 'amount must be an int or a float'
         if n_units != 0.0:
             self.n_units += n_units
         elif amount != 0.0:
@@ -92,7 +93,7 @@ class ForexHolding(BaseHolding):
             raise ValueError('You must specify either the number of units (n_units) or the amount (amount) '
                              'that you wish to purchase.')
 
-    def sell(self, n_units=0.0, amount=0.0):
+    def sell(self, n_units=0, amount=0):
         """
         Sell foreign currency.
 
@@ -101,12 +102,57 @@ class ForexHolding(BaseHolding):
         :raise ValueError: Raised if both n_units and amount are 0.0 (default values), else n_units takes priority.
         :return:
         """
-        assert isinstance(n_units, (int, float))
-        assert isinstance(amount, (int, float))
+        assert isinstance(n_units, (int, float)), 'n_units must be an int or a float'
+        assert isinstance(amount, (int, float)), 'amount must be an int or a float'
         if n_units != 0.0:
             self.n_units -= n_units
         elif amount != 0.0:
             self.n_units -= (amount * self.current_price)
+        else:
+            raise ValueError('You must specify either the number of units (n_units) or the amount (amount) '
+                             'that you wish to sell.')
+
+
+class ShareHolding(BaseHolding):
+
+    @property
+    def balance(self):
+        return self.n_units * self.current_price
+
+    def buy(self, n_units=0, amount=0):
+        """
+        Buy shares.
+
+        :param n_units: The number of shares to buy.
+        :param amount: Buy a number of shares corresponding to an amount of money.
+        :raise ValueError: Raised if both n_units and amount are 0.0 (default values), else n_units takes priority.
+        :return:
+        """
+        assert isinstance(n_units, int), 'n_units must be an int'
+        assert isinstance(amount, (int, float)), 'amount must be an int or a float'
+        if n_units != 0.0:
+            self.n_units += n_units
+        elif amount != 0.0:
+            self.n_units += math.floor((amount / self.current_price))
+        else:
+            raise ValueError('You must specify either the number of units (n_units) or the amount (amount) '
+                             'that you wish to purchase.')
+
+    def sell(self, n_units=0, amount=0):
+        """
+        Sell shares.
+
+        :param n_units: The number of shares to sell.
+        :param amount: Sell the number of shares corresponding to an amount of money.
+        :raise ValueError: Raised if both n_units and amount are 0.0 (default values), else n_units takes priority.
+        :return:
+        """
+        assert isinstance(n_units, int), 'n_units must be an int'
+        assert isinstance(amount, (int, float)), 'amount must be an int or a float'
+        if n_units != 0.0:
+            self.n_units -= n_units
+        elif amount != 0.0:
+            self.n_units -= math.floor((amount / self.current_price))
         else:
             raise ValueError('You must specify either the number of units (n_units) or the amount (amount) '
                              'that you wish to sell.')
