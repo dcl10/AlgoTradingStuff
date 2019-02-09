@@ -3,29 +3,68 @@ import math
 
 
 class Portfolio:
+    """
+    This class represents a portfolio of investments and is a container for instances of the BaseHolding class
+    and its subclasses.
+
+    Attributes:
+        name (str): The name of the portfolio.
+        holdings (dict): A dict containing all the holdings in the portfolio, retrievable by name.
+        pot (float): The amount of money available to be allocated to holdings.
+    """
 
     def __init__(self, name, pot=0.0):
+        """
+        The constructor method for the class.
+
+        :param name: (str) The name of the portfolio.
+        :param pot: (float) The initial amount of money in the portfolio (default = 0.0).
+        """
         self.name = name
         self.holdings = {}
         self.pot = pot
 
     @property
     def current_value(self):
+        """Returns the sum of balances of every holding in the portfolio."""
         return sum([h.balance for h in self.holdings])
 
     def add_holdings(self, *args, **kwargs):
+        """
+        Add a holding to the portfolio. This can be done by passing comma separated BaseHolding objects as parameters,
+        or as comma separated keyword-BaseHolding pairs.
+        :param args: (BaseHolding) Instances of BaseHolding.
+        :param kwargs: (BaseHolding) Keyword-BaseHolding pairs (e.g. aapl=BaseHolding('aapl')
+        :return:
+        """
         if args:
             for arg in args:
                 assert isinstance(arg, BaseHolding), 'You can only add instances of BaseHolding and its subclasses'
                 self.holdings.update({arg.name: arg})
         if kwargs:
+            for key, value in kwargs:
+                assert isinstance(value, BaseHolding), 'You can only add instances of BaseHolding and its subclasses'
             self.holdings.update(**kwargs)
 
     def remove_holdings(self, *args):
+        """
+        Sell all units of a named holding and remove it from the portfolio.
+
+        :param args: (str) Comma separated strings corresponding to the names of holdings in the portfolio.
+        :return:
+        """
         for arg in args:
+            self.deallocate(arg, arg.n_units, sell_units=True)
             del self.holdings[arg]
 
     def allocate(self, holding, amount, buy_units=False):
+        """
+        Allocate funds in the pot to a holding.
+        :param holding: (str) The name of the holding to buy.
+        :param amount: (int, float) Either a number of units to buy or an amount of money to convert to units.
+        :param buy_units: (bool) Is amount a number of units or an amount of money?
+        :return:
+        """
         if buy_units:
             assert self.pot >= (self.holdings[holding].current_price * amount), 'You cannot allocate more funds than ' \
                                                                                 'are in your portfolio\'s pot'
@@ -37,6 +76,13 @@ class Portfolio:
             self.pot -= amount
 
     def deallocate(self, holding, amount, sell_units=False):
+        """
+        Allocate funds in the pot to a holding.
+        :param holding: (str) The name of the holding to sell.
+        :param amount: (int, float) Either a number of units to sell or an amount of money to convert to units.
+        :param sell_units: (bool) Is amount a number of units or an amount of money?
+        :return:
+        """
         if sell_units:
             self.holdings[holding].sell(n_units=amount)
             self.pot += (self.holdings[holding].current_price * amount)
@@ -78,8 +124,8 @@ class ForexHolding(BaseHolding):
         """
         Buy foreign currency.
 
-        :param n_units: The amount of foreign currency (in that currency) to buy.
-        :param amount: The amount of native currency to convert to foreign currency.
+        :param n_units: (int, float) The amount of foreign currency (in that currency) to buy.
+        :param amount: (int, float) The amount of native currency to convert to foreign currency.
         :raise ValueError: Raised if both n_units and amount are 0.0 (default values), else n_units takes priority.
         :return:
         """
@@ -97,8 +143,8 @@ class ForexHolding(BaseHolding):
         """
         Sell foreign currency.
 
-        :param n_units: The amount of foreign currency you wish to convert back.
-        :param amount: The amount of native you wish to buy back.
+        :param n_units: (int, float) The amount of foreign currency you wish to convert back.
+        :param amount: (int, float) The amount of native you wish to buy back.
         :raise ValueError: Raised if both n_units and amount are 0.0 (default values), else n_units takes priority.
         :return:
         """
@@ -123,8 +169,8 @@ class ShareHolding(BaseHolding):
         """
         Buy shares.
 
-        :param n_units: The number of shares to buy.
-        :param amount: Buy a number of shares corresponding to an amount of money.
+        :param n_units: (int) The number of shares to buy.
+        :param amount: (int, float) Buy a number of shares corresponding to an amount of money.
         :raise ValueError: Raised if both n_units and amount are 0.0 (default values), else n_units takes priority.
         :return:
         """
@@ -142,8 +188,8 @@ class ShareHolding(BaseHolding):
         """
         Sell shares.
 
-        :param n_units: The number of shares to sell.
-        :param amount: Sell the number of shares corresponding to an amount of money.
+        :param n_units: (int) The number of shares to sell.
+        :param amount: (int, float) Sell the number of shares corresponding to an amount of money.
         :raise ValueError: Raised if both n_units and amount are 0.0 (default values), else n_units takes priority.
         :return:
         """
