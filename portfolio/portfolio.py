@@ -161,6 +161,10 @@ class ForexHolding(BaseHolding):
 
 class ShareHolding(BaseHolding):
 
+    def __init__(self, name, data, n_units=0.0, current_price=0.0):
+        n_units = int(n_units)  # coerce n_units to int
+        super().__init__(name, data, n_units, current_price)
+
     @property
     def balance(self):
         return self.n_units * self.current_price
@@ -202,3 +206,22 @@ class ShareHolding(BaseHolding):
         else:
             raise ValueError('You must specify either the number of units (n_units) or the amount (amount) '
                              'that you wish to sell.')
+
+
+def make_holding(kind, name, data, n_units=0.0, current_price=0.0):
+    """
+    Factory method for making Holding objects.
+
+    :param kind: (str) The kind of Holding you want to make ({'share', 'forex'})
+    :param name: (str) The name of the Holding
+    :param data: (pandas.DataFrame) Data table for the Holding
+    :param n_units: (int, float) The number of units you want initially; coerced to int if kind == 'share'
+    :param current_price: (int, float) The current price of the Holding
+    :return: BaseHolding subclass
+    """
+    if kind == 'share':
+        return ShareHolding(name, data, n_units, current_price)
+    elif kind == 'forex':
+        return ForexHolding(name, data, n_units, current_price)
+    else:
+        raise ValueError('`kind` must be \'share\' or \'forex\'.')
