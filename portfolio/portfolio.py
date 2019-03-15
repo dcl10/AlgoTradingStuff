@@ -93,10 +93,11 @@ class Portfolio:
 
 class BaseHolding(abc.ABC):
 
-    def __init__(self, name, n_units=0.0, current_price=0.0):
+    def __init__(self, name, data, price_col, n_units=0.0):
         self.name = name
-        self.current_price = current_price
         self.n_units = n_units
+        self.data = data
+        self.current_price = self.data.loc[-1:, price_col]
 
     @property
     @abc.abstractmethod
@@ -110,6 +111,10 @@ class BaseHolding(abc.ABC):
     @abc.abstractmethod
     def sell(self, n_units=0, amount=0):
         pass
+
+    def update(self, new, price_col):
+        self.data = new
+        self.current_price = self.data.loc[-1:, price_col]
 
 
 class ForexHolding(BaseHolding):
@@ -161,9 +166,9 @@ class ForexHolding(BaseHolding):
 
 class ShareHolding(BaseHolding):
 
-    def __init__(self, name, data, n_units=0.0, current_price=0.0):
+    def __init__(self, name, data, price_col, n_units=0.0):
         n_units = int(n_units)  # coerce n_units to int
-        super().__init__(name, data, n_units, current_price)
+        super().__init__(name, data, price_col, n_units=n_units)
 
     @property
     def balance(self):
@@ -208,10 +213,11 @@ class ShareHolding(BaseHolding):
                              'that you wish to sell.')
 
 
-def make_holding(kind, name, data, n_units=0.0, current_price=0.0):
+def make_holding(kind, name, data, price_col, n_units=0.0):
     """
     Factory method for making Holding objects.
 
+    :param price_col:
     :param kind: (str) The kind of Holding you want to make ({'share', 'forex'})
     :param name: (str) The name of the Holding
     :param data: (pandas.DataFrame) Data table for the Holding
@@ -220,8 +226,8 @@ def make_holding(kind, name, data, n_units=0.0, current_price=0.0):
     :return: BaseHolding subclass
     """
     if kind == 'share':
-        return ShareHolding(name, data, n_units, current_price)
+        return ShareHolding(name, data, price_col, n_units)
     elif kind == 'forex':
-        return ForexHolding(name, data, n_units, current_price)
+        return ForexHolding(name, data, price_col, n_units)
     else:
         raise ValueError('`kind` must be \'share\' or \'forex\'.')
