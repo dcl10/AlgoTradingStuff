@@ -217,12 +217,11 @@ def make_holding(kind, name, data, price_col, n_units=0.0):
     """
     Factory method for making Holding objects.
 
-    :param price_col:
     :param kind: (str) The kind of Holding you want to make ({'share', 'forex'})
     :param name: (str) The name of the Holding
     :param data: (pandas.DataFrame) Data table for the Holding
+    :param price_col: (str) The name of the column with the price values
     :param n_units: (int, float) The number of units you want initially; coerced to int if kind == 'share'
-    :param current_price: (int, float) The current price of the Holding
     :return: BaseHolding subclass
     """
     if kind == 'share':
