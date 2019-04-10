@@ -1,0 +1,11 @@
+numpy
+pandas
+matplotlib
+seaborn
+sklearn
+statsmodels
+quandl
+plotly
+gunicorn
+flask
+dash

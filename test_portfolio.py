@@ -1,6 +1,6 @@
 import unittest
 
-from .portfolio import Portfolio, ForexHolding
+from portfolio import Portfolio, ForexHolding
 
 
 class TestPortfolio(unittest.TestCase):

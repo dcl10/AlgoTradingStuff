@@ -1,9 +1,3 @@
-import numpy as np
-import pandas as pd
-import quandl
-import datetime as dt
-
-from portfolio.portfolio import make_holding
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 from sklearn.linear_model import LogisticRegression
