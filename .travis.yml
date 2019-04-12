@@ -9,4 +9,4 @@ script:
   - echo $(pwd)
   - cd AlgoTradingStuff
   - echo $(pwd)
-  - gunicorn --bind 0.0.0.0:8000 Dashboard.wsgi
+  - python Dashboard/wsgi.py
