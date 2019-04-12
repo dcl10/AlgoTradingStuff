@@ -7,6 +7,4 @@ install:
   - pip install -r requirements.txt
 script:
   - echo $(pwd)
-  - cd AlgoTradingStuff
-  - echo $(pwd)
   - python Dashboard/wsgi.py
