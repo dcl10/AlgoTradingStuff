@@ -7,5 +7,6 @@ install:
   - pip install -r requirements.txt
 script:
   - echo $(pwd)
-#  - cd ~/AlgoTradingStuff
-#  - gunicorn --bind 0.0.0.0:8000 Dashboard.wsgi
+  - cd AlgoTradingStuff
+  - echo $(pwd)
+  - gunicorn --bind 0.0.0.0:8000 Dashboard.wsgi
