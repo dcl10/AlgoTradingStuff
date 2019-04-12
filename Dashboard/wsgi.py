@@ -1,4 +1,4 @@
-from Dashboard.app import application
+from . import app
 
 if __name__ == '__main__':
-    application.run_server()
+    app.application.run_server()
