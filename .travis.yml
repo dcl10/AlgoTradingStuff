@@ -8,4 +8,3 @@ install:
 script:
   - echo $(pwd)
   - python Dashboard/wsgi.py &
-  - pkill -u $(whoami)
