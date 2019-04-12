@@ -19,7 +19,7 @@ class Pipeline:
         self._labeler = None
 
     def _is_stationary(self):
-        test: tuple = adfuller(self.data[self.prices])  # type annotation stops PyCharm yelling at me
+        test = adfuller(self.data[self.prices])
         return test[1] < 0.05
 
     def _train_predictor(self):
