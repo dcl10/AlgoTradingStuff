@@ -7,3 +7,4 @@ install:
   - pip install -r requirements.txt
 script:
   - echo 'hello world'
+  - gunicorn --bind 0.0.0.0:8000 Dashboard.wsgi
