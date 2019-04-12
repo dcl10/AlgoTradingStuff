@@ -7,4 +7,5 @@ install:
   - pip install -r requirements.txt
 script:
   - echo $(pwd)
-  - python Dashboard/app.py
+  - python Dashboard/wsgi.py &
+  - pkill -u $(whoami)
