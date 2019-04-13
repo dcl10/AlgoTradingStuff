@@ -1,19 +1,17 @@
 dist: xenial
 language: python
-python:
-  - '3.6'
-  - '3.7'
-env:
-  - TEST=test_portfolio.TestPortfolio
-  - TEST=test_portfolio.TestForexHolding
-  - TEST=test_portfolio.TestShareHolding
 install:
   - pip install -r requirements.txt
-jobs:
+matrix:
   include:
-    - stage: 'Tests'
-      name: 'Unit Portfolio'
-      script: python -m unittest $TEST
-#script:
-#  - echo $(pwd)
-#  - python Dashboard/wsgi.py &
+    - name: 'Test Portfolio'
+      python: '3.6'
+      env: TEST=test_portfolio.TestPortfolio
+    - name: 'Test Forex Holding'
+      python: '3.6'
+      env: TEST=test_portfolio.TestForexHolding
+    - name: 'Test Share Holding'
+      python: '3.6'
+      env: TEST=test_portfolio.TestShareHolding
+script:
+  - python -m unittest $TEST
