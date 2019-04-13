@@ -3,8 +3,17 @@ language: python
 python:
   - '3.6'
   - '3.7'
+env:
+  - TEST=test_portfolio.TestPortfolio
+  - TEST=test_portfolio.TestForexHolding
+  - TEST=test_portfolio.TestShareHolding
 install:
   - pip install -r requirements.txt
-script:
-  - echo $(pwd)
-  - python Dashboard/wsgi.py &
+jobs:
+  include:
+    - stage: 'Tests'
+      name: 'Unit Portfolio'
+      script: python -m unittest $TEST
+#script:
+#  - echo $(pwd)
+#  - python Dashboard/wsgi.py &

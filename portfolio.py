@@ -97,7 +97,7 @@ class BaseHolding(abc.ABC):
         self.name = name
         self.n_units = n_units
         self.data = data
-        self.current_price = self.data.loc[-1:, price_col]
+        self.current_price = self.data[price_col][-1]
 
     @property
     @abc.abstractmethod
