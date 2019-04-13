@@ -16,10 +16,10 @@ class TestPortfolio(unittest.TestCase):
         del self.portfolio
 
     def test_add_remove(self):
-        self.portfolio.add_holdings(ForexHolding('aapl', 10, 100))
+        self.portfolio.add_holdings(ForexHolding('aapl', self.aapl, 'Adj_Close'))
         self.assertEqual(1, len(self.portfolio.holdings))
         self.assertRaises(AssertionError, self.portfolio.add_holdings, 1, 'hi', True, {'key': 'value'})
-        self.portfolio.add_holdings(**{'msft': ForexHolding('msft', 10, 5)})
+        self.portfolio.add_holdings(**{'msft': ForexHolding('msft', self.aapl, 'Adj_Close')})
         self.assertEqual(2, len(self.portfolio.holdings))
         self.portfolio.remove_holdings('aapl')
         self.assertEqual(1, len(self.portfolio.holdings))

@@ -42,7 +42,7 @@ class Portfolio:
                 assert isinstance(arg, BaseHolding), 'You can only add instances of BaseHolding and its subclasses'
                 self.holdings.update({arg.name: arg})
         if kwargs:
-            for key, value in kwargs:
+            for key, value in kwargs.items():
                 assert isinstance(value, BaseHolding), 'You can only add instances of BaseHolding and its subclasses'
             self.holdings.update(**kwargs)
 
@@ -54,7 +54,6 @@ class Portfolio:
         :return:
         """
         for arg in args:
-            self.deallocate(arg, arg.n_units, sell_units=True)
             del self.holdings[arg]
 
     def allocate(self, holding, amount, buy_units=False):
