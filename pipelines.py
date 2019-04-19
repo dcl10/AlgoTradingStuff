@@ -3,8 +3,11 @@ from sklearn.metrics import classification_report
 from sklearn.linear_model import LogisticRegression
 from statsmodels.tsa.stattools import adfuller
 from statsmodels.tsa.arima_model import ARMA
-from itertools import permutations
+from itertools import combinations_with_replacement
 from multiprocessing import Pool
+
+import numpy as np
+import pandas as pd
 
 
 class Pipeline:
@@ -23,21 +26,23 @@ class Pipeline:
         return test[1] < 0.05
 
     def _train_predictor(self):
-        perms = list(permutations([0, 1, 2, 3, 4], 2))
+        perms = list(range(1, 6))
         aics = []
         for i in perms:
-            arima = ARMA(self.data, order=i).fit()
+            arima = ARMA(self.data[self.prices], order=(0, i)).fit()
             aics.append(arima.aic)
-        orders = perms[aics.index(min(aics))]
-        self._predictor = ARMA(self.data, order=orders).fit()
+        orders = (0, perms[aics.index(min(aics))])
+        print(orders)
+        # self._predictor = ARMA(self.data, order=orders).fit()
 
+    # TODO: find another way to parallelise this function
     def _train_predictor_para(self):
         # Wrapper for `ARMA.fit` to make it compatible with `Pool.map`
         def _fit(mod):
             return mod.fit()
         perms = list(permutations([0, 1, 2, 3, 4], 2))
         pool = Pool(processes=self.threads)
-        mods = [ARMA(self.data, order=i) for i in perms]
+        mods = [ARMA(self.data[self.prices], order=i) for i in perms]
         aics = [fit.aic for fit in pool.map(_fit, mods)]
         orders = perms[aics.index(min(aics))]
         self._predictor = ARMA(self.data, order=orders).fit()
@@ -64,8 +69,18 @@ class Pipeline:
         if self.threads > 1:
             if self._is_stationary():
                 self._train_predictor_para()
-                self._train_labeler_para()
+                # self._train_labeler_para()
         else:
             if self._is_stationary():
                 self._train_predictor()
-                self._train_labeler()
+                # self._train_labeler()
+
+
+if __name__ == '__main__':
+    data = pd.read_csv('aapl_test.csv', index_col='Date', parse_dates=True)
+    data.drop('Dividend', axis=1, inplace=True)
+    data = data.pct_change().dropna()
+    data = data.resample('D').sum()
+    print(adfuller(data['Adj_Close'])[1] <= 0.05)
+    pipe = Pipeline(data=data, prices='Adj_Close')
+    pipe.train()
