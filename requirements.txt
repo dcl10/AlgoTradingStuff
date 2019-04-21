@@ -9,4 +9,5 @@ plotly
 gunicorn
 flask
 dash
+dash-bootstrap-components
 sqlalchemy
