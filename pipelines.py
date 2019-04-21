@@ -29,11 +29,12 @@ class Pipeline:
         perms = list(range(1, 6))
         aics = []
         for i in perms:
-            arima = ARMA(self.data[self.prices], order=(0, i)).fit()
+            arima = ARMA(self.data[self.prices], order=(0, i)).fit(disp=False)
             aics.append(arima.aic)
         orders = (0, perms[aics.index(min(aics))])
         print(orders)
-        # self._predictor = ARMA(self.data, order=orders).fit()
+        self._predictor = ARMA(self.data[self.prices], order=orders).fit(disp=False)
+        print(self._predictor.maparams)
 
     # TODO: find another way to parallelise this function
     def _train_predictor_para(self):
