@@ -9,3 +9,4 @@ plotly
 gunicorn
 flask
 dash
+sqlalchemy

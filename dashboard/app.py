@@ -6,8 +6,10 @@ import numpy as np
 application = dash.Dash()
 x = np.array([1, 2, 3, 4, 5])
 
+title = html.H1('Stock Tracker')
+
 application.layout = html.Div([
-    html.H1('This is a test'),
+    title,
     html.P('testing... testing...'),
     dcc.Graph(figure={
         'data': [
@@ -19,4 +21,4 @@ application.layout = html.Div([
 ])
 
 if __name__ == '__main__':
-    application.run_server()
+    application.run_server(debug=True)
