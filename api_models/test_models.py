@@ -19,7 +19,7 @@ class TestStaticMethods(unittest.TestCase):
 
     def setUp(self) -> None:
         parser = configparser.ConfigParser()
-        parser.read('./oanda_config.txt')
+        parser.read('oanda.txt')
         self.api_key = parser['oanda'].get('api_key')
         self.account = parser['oanda'].get('primary_account')
 
@@ -27,6 +27,7 @@ class TestStaticMethods(unittest.TestCase):
         accounts = get_accounts(self.api_key)
         self.assertIsInstance(accounts, list)
         self.assertIsInstance(accounts[0], dict)
+        self.assertIn('id', accounts[0].keys())
         bad_key = get_accounts('jfjwjfwjfjwfj')
         self.assertEqual(bad_key, None)
 
