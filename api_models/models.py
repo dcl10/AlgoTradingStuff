@@ -1,4 +1,5 @@
 import requests
+from api_models.errors import AccountError
 
 
 class Account:
@@ -24,13 +25,14 @@ def get_accounts(api_key: str):
     response = requests.get('https://api-fxpractice.oanda.com/v3/accounts',
                             headers={'Authorization': f'Bearer {api_key}'})
     code = response.status_code
+    reason = response.reason
     if code == 200:
         accounts = response.json().get('accounts')
         response.close()
         return accounts
     else:
         response.close()
-        return None
+        raise AccountError(f'AccountError: no accounts found. Reason: {reason}')
 
 
 def get_account(account_id: str, api_key: str):
@@ -40,5 +42,15 @@ def get_account(account_id: str, api_key: str):
     :param api_key: the API for your OANDA account
     :return:
     """
-    response = requests.get(f'https://api-fxpractice.oanda.com/v3/accounts/{account_id}')
-    pass
+    response = requests.get(f'https://api-fxpractice.oanda.com/v3/accounts/{account_id}',
+                            headers={'Authorization': f'Bearer {api_key}'})
+    code = response.status_code
+    reason = response.reason
+    if code == 200:
+        account = response.json().get('account')
+        response.close()
+        return account
+    else:
+        response.close()
+        raise AccountError(f'AccountError: failed to get account with ID: {account_id}, '
+                           f'Reason {reason}')
