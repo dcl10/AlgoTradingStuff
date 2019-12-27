@@ -33,15 +33,26 @@ class TestAccount(unittest.TestCase):
         self.assertRaises(AccountError, account.create_order, {})
 
     def test_cancel_order(self):
-        data = {'order': {'type': 'MARKET',
-                          'units': '1',
-                          'timeInForce': 'FOK',
-                          'instrument': 'GBP_USD',
-                          'positionFill': 'DEFAULT'}}
+        data = {'order': {"price": '1.2',
+                          "timeInForce": "GTC",
+                          "instrument": "GBP_USD",
+                          "units": "1",
+                          "clientExtensions": {
+                              "comment": "New idea for trading",
+                              "tag": "strategy_9",
+                              "id": "my_order_100"
+                          },
+                          "type": "MARKET_IF_TOUCHED",
+                          "positionFill": "DEFAULT"}}
+        # data = {'order': {'type': 'MARKET',
+        #                        'units': '1',
+        #                        'timeInForce': 'FOK',
+        #                        'instrument': 'GBP_USD',
+        #                        'positionFill': 'DEFAULT'}}
         orders_req = requests.post(f'{self.base_url}/accounts/{self.account_id}/orders',
                             json=data,
                             headers={'Authorization': f'Bearer {self.api_key}'})
-        order_id = orders_req.json().get('orderFillTransaction')
+        order_id = orders_req.json().get('orderCreateTransaction').get('id')
         print(order_id)
         orders_req.close()
         account_req = requests.get(f'{self.base_url}/accounts/{self.account_id}',
