@@ -18,6 +18,7 @@ class TestAccount(unittest.TestCase):
         response = requests.get(f'{self.base_url}/accounts/{self.account_id}',
                                 headers={'Authorization': f'Bearer {self.api_key}'})
         acc = response.json().get('account', {})
+        response.close()
         account = Account(self.api_key, self.base_url, self.account_id, **acc)
         new_order = {'order': {'type': 'MARKET',
                                'units': '1',
@@ -26,10 +27,33 @@ class TestAccount(unittest.TestCase):
                                'positionFill': 'DEFAULT'}}
         order_response = account.create_order(new_order)
         self.assertIsInstance(order_response, dict)
-        self.assertIn('id', order_response)
+        self.assertIn('orderID', order_response)
         self.assertIn('accountID', order_response)
         self.assertIn('instrument', order_response)
         self.assertRaises(AccountError, account.create_order, {})
+
+    def test_cancel_order(self):
+        data = {'order': {'type': 'MARKET',
+                          'units': '1',
+                          'timeInForce': 'FOK',
+                          'instrument': 'GBP_USD',
+                          'positionFill': 'DEFAULT'}}
+        orders_req = requests.post(f'{self.base_url}/accounts/{self.account_id}/orders',
+                            json=data,
+                            headers={'Authorization': f'Bearer {self.api_key}'})
+        order_id = orders_req.json().get('orderFillTransaction')
+        print(order_id)
+        orders_req.close()
+        account_req = requests.get(f'{self.base_url}/accounts/{self.account_id}',
+                                headers={'Authorization': f'Bearer {self.api_key}'})
+        acc = account_req.json().get('account', {})
+        account_req.close()
+        account = Account(self.api_key, self.base_url, self.account_id, **acc)
+        result = account.cancel_order(order_id)
+        self.assertIsInstance(result, dict)
+        self.assertIn('reason', result.keys())
+        self.assertEqual(result['reason'], 'CLIENT_REQUEST')
+        self.assertRaises(AccountError, account.cancel_order, 'jeijfiejf')
 
 
 class TestStaticMethods(unittest.TestCase):

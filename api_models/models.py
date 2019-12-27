@@ -8,15 +8,23 @@ class Account:
     This class hold information about an OANDA account
     """
 
-    def __init__(self, api_key, base_url, account_id, **kwargse):
+    def __init__(self, api_key: str, base_url: str, account_id: str, **kwargs):
+        """
+
+        :param api_key:
+        :param base_url:
+        :param account_id:
+        :param kwargs:
+        """
         self.api_key = api_key
         self.base_url = base_url
         self.account_id = account_id
-        self.__dict__.update(kwargse)
+        self.__dict__.update(kwargs)
 
-    def create_order(self, data):
+    def create_order(self, data: dict):
         """
         This method creates an order of the specified type and amount of units
+        :param data:
         :return:
         """
         req = requests.post(f'{self.base_url}/accounts/{self.account_id}/orders',
@@ -29,17 +37,31 @@ class Account:
         if code == 201:
             new_details = get_account(self.account_id, self.api_key, base_url=self.base_url)
             self.__dict__.update(new_details)
-            order = response.get('orderCreateTransaction')
+            order = response.get('orderFillTransaction')
             return order
         else:
             raise AccountError(f'unable to create the specified order. Reason {reason}')
 
-    def cancel_order(self):
+    def cancel_order(self, order_id: str):
         """
         This method cancels the specified order
+        :param order_id:
         :return:
         """
-        pass
+        response = requests.put(f'{self.base_url}/accounts/{self.account_id}/orders/{order_id}/cancel',
+                                headers={'Authorization': f'Bearer {self.api_key}'})
+        code = response.status_code
+        reason = response.reason
+        result = response.json()
+        response.close()
+        print(code, reason, result)
+        if code == 200:
+            new_details = get_account(self.account_id, self.api_key, base_url=self.base_url)
+            self.__dict__.update(new_details)
+            cancel = result.get('orderCancelTransaction')
+            return cancel
+        else:
+            raise AccountError(f'unable to cancel order {order_id}. Reason {reason}')
 
 
 def get_accounts(api_key: str, base_url='https://api-fxpractice.oanda.com/v3'):
