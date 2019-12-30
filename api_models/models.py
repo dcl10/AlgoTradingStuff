@@ -1,5 +1,6 @@
 import requests
 import os
+import json
 from api_models.errors import AccountError
 
 
@@ -54,7 +55,6 @@ class Account:
         reason = response.reason
         result = response.json()
         response.close()
-        print(code, reason, result)
         if code == 200:
             new_details = get_account(self.account_id, self.api_key, base_url=self.base_url)
             self.__dict__.update(new_details)
@@ -62,6 +62,27 @@ class Account:
             return cancel
         else:
             raise AccountError(f'unable to cancel order {order_id}. Reason {reason}')
+
+    def close_position(self, instrument: str):
+        """
+        This method closes the position for a given instrument
+        :param instrument:
+        :return:
+        """
+        response = requests.put(f'{self.base_url}/accounts/{self.account_id}/positions/{instrument}/close',
+                                headers={'Authorization': f'Bearer {self.api_key}',
+                                         'Content-Type': 'application/json'},
+                                data=json.dumps({'longUnits': "ALL"}))
+        code = response.status_code
+        reason = response.reason
+        result = response.json()
+        response.close()
+        if code == 200:
+            new_details = get_account(self.account_id, self.api_key, base_url=self.base_url)
+            self.__dict__.update(new_details)
+            return result
+        else:
+            raise AccountError(f'unable to close position for {instrument}. Reason {reason}')
 
 
 def get_accounts(api_key: str, base_url='https://api-fxpractice.oanda.com/v3'):

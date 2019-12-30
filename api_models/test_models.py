@@ -44,19 +44,13 @@ class TestAccount(unittest.TestCase):
                           },
                           "type": "MARKET_IF_TOUCHED",
                           "positionFill": "DEFAULT"}}
-        # data = {'order': {'type': 'MARKET',
-        #                        'units': '1',
-        #                        'timeInForce': 'FOK',
-        #                        'instrument': 'GBP_USD',
-        #                        'positionFill': 'DEFAULT'}}
         orders_req = requests.post(f'{self.base_url}/accounts/{self.account_id}/orders',
-                            json=data,
-                            headers={'Authorization': f'Bearer {self.api_key}'})
+                                   json=data,
+                                   headers={'Authorization': f'Bearer {self.api_key}'})
         order_id = orders_req.json().get('orderCreateTransaction').get('id')
-        print(order_id)
         orders_req.close()
         account_req = requests.get(f'{self.base_url}/accounts/{self.account_id}',
-                                headers={'Authorization': f'Bearer {self.api_key}'})
+                                   headers={'Authorization': f'Bearer {self.api_key}'})
         acc = account_req.json().get('account', {})
         account_req.close()
         account = Account(self.api_key, self.base_url, self.account_id, **acc)
@@ -65,6 +59,24 @@ class TestAccount(unittest.TestCase):
         self.assertIn('reason', result.keys())
         self.assertEqual(result['reason'], 'CLIENT_REQUEST')
         self.assertRaises(AccountError, account.cancel_order, 'jeijfiejf')
+
+    def test_close_position(self):
+        response = requests.get(f'{self.base_url}/accounts/{self.account_id}',
+                                headers={'Authorization': f'Bearer {self.api_key}'})
+        acc = response.json().get('account', {})
+        response.close()
+        account = Account(self.api_key, self.base_url, self.account_id, **acc)
+        new_order = {'order': {'type': 'MARKET',
+                               'units': '1',
+                               'timeInForce': 'FOK',
+                               'instrument': 'GBP_USD',
+                               'positionFill': 'DEFAULT'}}
+        order_req = requests.post(f'{self.base_url}/accounts/{self.account_id}/orders',
+                                  json=new_order,
+                                  headers={'Authorization': f'Bearer {self.api_key}'})
+        order_req.close()
+        self.assertIsInstance(account.close_position('GBP_USD'), dict)
+        self.assertRaises(AccountError, account.close_position, 'jefjejfe')
 
 
 class TestStaticMethods(unittest.TestCase):
