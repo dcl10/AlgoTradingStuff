@@ -63,6 +63,12 @@ class Account:
         else:
             raise AccountError(f'unable to cancel order {order_id}. Reason {reason}')
 
+    def get_open_positions(self):
+        """
+        This method gets all the open positions for the account
+        :return:
+        """
+
     def close_position(self, instrument: str):
         """
         This method closes the position for the provided instrument
@@ -136,7 +142,7 @@ def get_account(account_id: str, api_key: str, base_url='https://api-fxpractice.
     :raises: AccountError
     :return:
     """
-    response = requests.get(f'{base_url}/accounts/{account_id}',
+    response = requests.get(f'{base_url}/accounts/{account_id}/summary',
                             headers={'Authorization': f'Bearer {api_key}'})
     code = response.status_code
     reason = response.reason
