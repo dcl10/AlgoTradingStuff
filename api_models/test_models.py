@@ -1,6 +1,7 @@
 import unittest
 import configparser
 import requests
+import json
 from api_models.models import Account, get_accounts, get_account
 from api_models.errors import AccountError
 
@@ -27,10 +28,15 @@ class TestAccount(unittest.TestCase):
                                'positionFill': 'DEFAULT'}}
         order_response = account.create_order(new_order)
         self.assertIsInstance(order_response, dict)
-        self.assertIn('orderID', order_response)
+        self.assertIn('id', order_response)
         self.assertIn('accountID', order_response)
         self.assertIn('instrument', order_response)
         self.assertRaises(AccountError, account.create_order, {})
+        close_req = requests.put(f'{self.base_url}/accounts/{self.account_id}/positions/GBP_USD/close',
+                                 headers={'Authorization': f'Bearer {self.api_key}',
+                                          'Content-Type': 'application/json'},
+                                 data=json.dumps({'longUnits': "ALL"}))
+        close_req.close()
 
     def test_cancel_order(self):
         data = {'order': {"price": '1.2',
@@ -77,6 +83,29 @@ class TestAccount(unittest.TestCase):
         order_req.close()
         self.assertIsInstance(account.close_position('GBP_USD'), dict)
         self.assertRaises(AccountError, account.close_position, 'jefjejfe')
+
+    def test_close_trade(self):
+        response = requests.get(f'{self.base_url}/accounts/{self.account_id}',
+                                headers={'Authorization': f'Bearer {self.api_key}'})
+        acc = response.json().get('account', {})
+        response.close()
+        account = Account(self.api_key, self.base_url, self.account_id, **acc)
+        new_order = {'order': {'type': 'MARKET',
+                               'units': '1',
+                               'timeInForce': 'FOK',
+                               'instrument': 'GBP_USD',
+                               'positionFill': 'DEFAULT'}}
+        req = requests.post(f'{self.base_url}/accounts/{self.account_id}/orders',
+                            json=new_order,
+                            headers={'Authorization': f'Bearer {self.api_key}'})
+        trade = req.json().get('id')
+        req.close()
+        c_trade_req = account.close_trade(trade)
+        self.assertIsInstance(c_trade_req, dict)
+        self.assertIn('id', c_trade_req)
+        self.assertIn('accountID', c_trade_req)
+        self.assertIn('instrument', c_trade_req)
+        self.assertRaises(AccountError, account.close_trade, 'iejfiuejf')
 
 
 class TestStaticMethods(unittest.TestCase):

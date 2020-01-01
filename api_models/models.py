@@ -38,7 +38,7 @@ class Account:
         if code == 201:
             new_details = get_account(self.account_id, self.api_key, base_url=self.base_url)
             self.__dict__.update(new_details)
-            order = response.get('orderFillTransaction')
+            order = response.get('orderCreateTransaction')
             return order
         else:
             raise AccountError(f'unable to create the specified order. Reason {reason}')
@@ -65,7 +65,7 @@ class Account:
 
     def close_position(self, instrument: str):
         """
-        This method closes the position for a given instrument
+        This method closes the position for the provided instrument
         :param instrument:
         :return:
         """
@@ -84,16 +84,37 @@ class Account:
         else:
             raise AccountError(f'unable to close position for {instrument}. Reason {reason}')
 
+    def close_trade(self, trade_specifier: str):
+        """
+        This method closes a trade with the provided trade specifier
+        :param trade_specifier:
+        :return:
+        """
+        response = requests.put(f'{self.base_url}/accounts/{self.account_id}/trades/{trade_specifier}/close',
+                                headers={'Authorization': f'Bearer {self.api_key}',
+                                         'Content-Type': 'application/json'},
+                                data=json.dumps({'units': "ALL"}))
+        code = response.status_code
+        reason = response.reason
+        result = response.json()
+        response.close()
+        if code == 200:
+            new_details = get_account(self.account_id, self.api_key, base_url=self.base_url)
+            self.__dict__.update(new_details)
+            return result
+        else:
+            raise AccountError(f'unable to close trade for {trade_specifier}. Reason {reason}')
+
 
 def get_accounts(api_key: str, base_url='https://api-fxpractice.oanda.com/v3'):
     """
-    Retrieve a list of account dicts if the request is successful, else return None
+    Retrieve a list of account dicts if the request is successful
     :param base_url: base URL for the OANDA API
     :param api_key: The API key for your OANDA account
     :raises: AccountError
     :return: Return list of accounts if request of successful, else None
     """
-    response = requests.get(f'{base_url}/v3/accounts',
+    response = requests.get(f'{base_url}/accounts',
                             headers={'Authorization': f'Bearer {api_key}'})
     code = response.status_code
     reason = response.reason
