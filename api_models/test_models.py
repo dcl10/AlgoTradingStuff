@@ -2,6 +2,7 @@ import unittest
 import configparser
 import requests
 import json
+import time
 from api_models.models import Account, get_accounts, get_account
 from api_models.errors import AccountError
 
@@ -112,11 +113,15 @@ class TestAccount(unittest.TestCase):
                                'timeInForce': 'FOK',
                                'instrument': 'GBP_USD',
                                'positionFill': 'DEFAULT'}}
-        req = requests.post(f'{self.base_url}/accounts/{self.account_id}/orders',
-                            json=new_order,
-                            headers={'Authorization': f'Bearer {self.api_key}'})
-        trade = req.json().get('id')
-        req.close()
+        order_req = requests.post(f'{self.base_url}/accounts/{self.account_id}/orders',
+                                  json=new_order,
+                                  headers={'Authorization': f'Bearer {self.api_key}'})
+        order_req.close()
+        trade_req = requests.get(f'{self.base_url}/accounts/{self.account_id}/openTrades',
+                                 headers={'Authorization': f'Bearer {self.api_key}'})
+        trades = trade_req.json().get('trades')
+        trade = trades[0].get('id')
+        trade_req.close()
         c_trade_req = self.account.close_trade(trade)
         self.assertIsInstance(c_trade_req, dict)
         self.assertIn('id', c_trade_req)

@@ -107,7 +107,7 @@ class Account:
         if code == 200:
             new_details = get_account(self.account_id, self.api_key, base_url=self.base_url)
             self.__dict__.update(new_details)
-            return result
+            return result.get('orderCreateTransaction')
         else:
             raise AccountError(f'unable to close trade for {trade_specifier}. Reason {reason}')
 
