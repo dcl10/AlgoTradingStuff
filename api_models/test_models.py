@@ -73,6 +73,7 @@ class TestAccount(unittest.TestCase):
         self.assertRaises(AccountError, self.account.cancel_order, 'jeijfiejf')
 
     def test_get_open_positions(self):
+        self.assertEqual(self.account.get_open_positions(), [])
         new_order = {'order': {'type': 'MARKET',
                                'units': '1',
                                'timeInForce': 'FOK',
@@ -109,6 +110,28 @@ class TestAccount(unittest.TestCase):
         order_req.close()
         self.assertIsInstance(self.account.close_position('GBP_USD'), dict)
         self.assertRaises(AccountError, self.account.close_position, 'jefjejfe')
+
+    def test_get_open_trades(self):
+        self.assertEqual(self.account.get_open_trades(), [])
+        new_order = {'order': {'type': 'MARKET',
+                               'units': '1',
+                               'timeInForce': 'FOK',
+                               'instrument': 'GBP_USD',
+                               'positionFill': 'DEFAULT'}}
+        order_req = requests.post(f'{self.base_url}/accounts/{self.account_id}/orders',
+                                  json=new_order,
+                                  headers={'Authorization': f'Bearer {self.api_key}'})
+        order_req.close()
+        trades = self.account.get_open_positions()
+        self.assertIsInstance(trades, list)
+        self.assertIsInstance(trades[0], dict)
+        self.assertIn('instrument', trades[0].keys())
+        close_req = requests.put(
+            f'{self.base_url}/accounts/{self.account_id}/positions/{trades[0].get("instrument")}/close',
+            headers={'Authorization': f'Bearer {self.api_key}',
+                     'Content-Type': 'application/json'},
+            data=json.dumps({'longUnits': "ALL"}))
+        close_req.close()
 
     def test_close_trade(self):
         # response = requests.get(f'{self.base_url}/accounts/{self.account_id}',

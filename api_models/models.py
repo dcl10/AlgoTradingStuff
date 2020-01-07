@@ -100,6 +100,22 @@ class Account:
         else:
             raise AccountError(f'unable to close position for {instrument}. Reason {reason}')
 
+    def get_open_trades(self):
+        """
+        This method gets all the open trades for the account
+        :return:
+        """
+        response = requests.get(f'{self.base_url}/accounts/{self.account_id}/openTrades',
+                                headers={'Authorization': f'Bearer {self.api_key}'})
+        code = response.status_code
+        reason = response.reason
+        result = response.json()
+        response.close()
+        if code == 200:
+            return result.get('trades')
+        else:
+            raise AccountError(f'Could not find any open positions for {self.account_id}. Reason {reason}')
+
     def close_trade(self, trade_specifier: str):
         """
         This method closes a trade with the provided trade specifier
