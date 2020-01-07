@@ -68,6 +68,16 @@ class Account:
         This method gets all the open positions for the account
         :return:
         """
+        response = requests.get(f'{self.base_url}/accounts/{self.account_id}/openPositions',
+                                headers={'Authorization': f'Bearer {self.api_key}'})
+        code = response.status_code
+        reason = response.reason
+        result = response.json()
+        response.close()
+        if code == 200:
+            return result.get('positions')
+        else:
+            raise AccountError(f'Could not find any open positions for {self.account_id}. Reason {reason}')
 
     def close_position(self, instrument: str):
         """

@@ -82,7 +82,15 @@ class TestAccount(unittest.TestCase):
                                   json=new_order,
                                   headers={'Authorization': f'Bearer {self.api_key}'})
         order_req.close()
-
+        positions = self.account.get_open_positions()
+        self.assertIsInstance(positions, list)
+        self.assertIsInstance(positions[0], dict)
+        self.assertIn('instrument', positions[0].keys())
+        close_req = requests.put(f'{self.base_url}/accounts/{self.account_id}/positions/{positions[0].get("instrument")}/close',
+                                 headers={'Authorization': f'Bearer {self.api_key}',
+                                          'Content-Type': 'application/json'},
+                                 data=json.dumps({'longUnits': "ALL"}))
+        close_req.close()
 
     def test_close_position(self):
         # response = requests.get(f'{self.base_url}/accounts/{self.account_id}',
