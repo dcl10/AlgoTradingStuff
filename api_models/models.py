@@ -1,6 +1,7 @@
 import requests
 import os
 import json
+import datetime as dt
 from api_models.errors import AccountError
 
 
@@ -136,6 +137,20 @@ class Account:
             return result.get('orderCreateTransaction')
         else:
             raise AccountError(f'unable to close trade for {trade_specifier}. Reason {reason}')
+
+    def get_candles(self, instrument, since=None, to=None, price='M', granularity='S5', count=500):
+        assert since < to, '`since` cannot be greater than or equal to `to`'
+        response = requests.get(f'{self.base_url}/accounts/{self.account_id}/instruments/{instrument}/candles',
+                                headers={'Authorization': f'Bearer {self.api_key}'},
+                                params={'granularity': granularity, 'price': price, 'count': count})
+        code = response.status_code
+        reason = response.reason
+        result = response.json()
+        response.close()
+        if code == 200:
+            return result.get('candles')
+        else:
+            raise AccountError(f'unable to retrieve data with the specified parameters. Reason {reason}')
 
 
 def get_accounts(api_key: str, base_url='https://api-fxpractice.oanda.com/v3'):
