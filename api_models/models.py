@@ -23,6 +23,12 @@ class Account:
         self.account_id = account_id
         self.__dict__.update(kwargs)
 
+    def __repr__(self):
+        return f'Account(api_key: <secret>, base_url: {self.base_url}, account_id: {self.account_id}'
+
+    def __str__(self):
+        return self.account_id
+
     def create_order(self, data: dict):
         """
         This method creates an order of the specified type and amount of units
