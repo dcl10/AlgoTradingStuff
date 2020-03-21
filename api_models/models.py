@@ -37,7 +37,8 @@ class Account:
         """
         req = requests.post(f'{self.base_url}/accounts/{self.account_id}/orders',
                             json=data,
-                            headers={'Authorization': f'Bearer {self.api_key}'})
+                            headers={'Authorization': f'Bearer {self.api_key}',
+                                     'Accept-Datetime-Format': 'UNIX'})
         code = req.status_code
         reason = req.reason
         response = req.json()
@@ -57,7 +58,8 @@ class Account:
         :return:
         """
         response = requests.put(f'{self.base_url}/accounts/{self.account_id}/orders/{order_id}/cancel',
-                                headers={'Authorization': f'Bearer {self.api_key}'})
+                                headers={'Authorization': f'Bearer {self.api_key}',
+                                         'Accept-Datetime-Format': 'UNIX'})
         code = response.status_code
         reason = response.reason
         result = response.json()
@@ -65,7 +67,7 @@ class Account:
         if code == 200:
             new_details = get_account(self.account_id, self.api_key, base_url=self.base_url)
             self.__dict__.update(new_details)
-            cancel = result.get('orderCancelTransaction')
+            cancel = result.get('orderCancelTransaction', {})
             return cancel
         else:
             raise AccountError(f'unable to cancel order {order_id}. Reason {reason}')
@@ -73,7 +75,7 @@ class Account:
     def get_open_positions(self):
         """
         This method gets all the open positions for the account
-        :return:
+        :return: a list of open positions, or an empty list if no positions
         """
         response = requests.get(f'{self.base_url}/accounts/{self.account_id}/openPositions',
                                 headers={'Authorization': f'Bearer {self.api_key}'})
@@ -82,7 +84,7 @@ class Account:
         result = response.json()
         response.close()
         if code == 200:
-            return result.get('positions')
+            return result.get('positions', [])
         else:
             raise AccountError(f'Could not find any open positions for {self.account_id}. Reason {reason}')
 
@@ -113,7 +115,8 @@ class Account:
         :return:
         """
         response = requests.get(f'{self.base_url}/accounts/{self.account_id}/openTrades',
-                                headers={'Authorization': f'Bearer {self.api_key}'})
+                                headers={'Authorization': f'Bearer {self.api_key}',
+                                         'Accept-Datetime-Format': 'UNIX'})
         code = response.status_code
         reason = response.reason
         result = response.json()
@@ -131,7 +134,8 @@ class Account:
         """
         response = requests.put(f'{self.base_url}/accounts/{self.account_id}/trades/{trade_specifier}/close',
                                 headers={'Authorization': f'Bearer {self.api_key}',
-                                         'Content-Type': 'application/json'},
+                                         'Content-Type': 'application/json',
+                                         'Accept-Datetime-Format': 'UNIX'},
                                 data=json.dumps({'units': "ALL"}))
         code = response.status_code
         reason = response.reason
@@ -144,11 +148,23 @@ class Account:
         else:
             raise AccountError(f'unable to close trade for {trade_specifier}. Reason {reason}')
 
-    def get_candles(self, instrument, since=None, to=None, price='M', granularity='S5', count=500):
+    def get_candles(self, instrument, since, to, price='M', granularity='S5', count=500):
+        """
+        TODO: turns out the code on github wasn't using the `since` and `to` params.
+        TODO: currently getting "Bad Request" with datetime objects. Find out why and fix
+        :param instrument:
+        :param since:
+        :param to:
+        :param price:
+        :param granularity:
+        :param count:
+        :return:
+        """
         assert since < to, '`since` cannot be greater than or equal to `to`'
         response = requests.get(f'{self.base_url}/accounts/{self.account_id}/instruments/{instrument}/candles',
-                                headers={'Authorization': f'Bearer {self.api_key}'},
-                                params={'granularity': granularity, 'price': price, 'count': count})
+                                headers={'Authorization': f'Bearer {self.api_key}',
+                                         'Accept-Datetime-Format': 'UNIX'},
+                                params={'granularity': granularity, 'price': price, 'from': since, 'to': str(to)})
         code = response.status_code
         reason = response.reason
         result = response.json()
