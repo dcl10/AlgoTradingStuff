@@ -109,14 +109,6 @@ class TestAccount(unittest.TestCase):
         order_req.close()
         trades = self.account.get_open_positions()
         self.assertIsInstance(trades, list)
-        self.assertIsInstance(trades[0], dict)
-        self.assertIn('instrument', trades[0].keys())
-        close_req = requests.put(
-            f'{self.base_url}/accounts/{self.account_id}/positions/{trades[0].get("instrument")}/close',
-            headers={'Authorization': f'Bearer {self.api_key}',
-                     'Content-Type': 'application/json'},
-            data=json.dumps({'longUnits': "ALL"}))
-        close_req.close()
 
     def test_close_trade(self):
         # response = requests.get(f'{self.base_url}/accounts/{self.account_id}',
