@@ -21,12 +21,14 @@ class TestAccount(unittest.TestCase):
         response.close()
         self.account = Account(self.api_key, self.base_url, self.account_id, **acc)
 
+    def tearDown(self) -> None:
+        close_req = requests.put(f'{self.base_url}/accounts/{self.account_id}/positions/GBP_USD/close',
+                                 headers={'Authorization': f'Bearer {self.api_key}',
+                                          'Content-Type': 'application/json'},
+                                 data=json.dumps({'longUnits': "ALL"}))
+        close_req.close()
+
     def test_create_order(self):
-        # response = requests.get(f'{self.base_url}/accounts/{self.account_id}',
-        #                         headers={'Authorization': f'Bearer {self.api_key}'})
-        # acc = response.json().get('account', {})
-        # response.close()
-        # account = Account(self.api_key, self.base_url, self.account_id, **acc)
         new_order = {'order': {'type': 'MARKET',
                                'units': '1',
                                'timeInForce': 'FOK',
@@ -34,15 +36,6 @@ class TestAccount(unittest.TestCase):
                                'positionFill': 'DEFAULT'}}
         order_response = self.account.create_order(new_order)
         self.assertIsInstance(order_response, dict)
-        self.assertIn('id', order_response)
-        self.assertIn('accountID', order_response)
-        self.assertIn('instrument', order_response)
-        self.assertRaises(AccountError, self.account.create_order, {})
-        close_req = requests.put(f'{self.base_url}/accounts/{self.account_id}/positions/GBP_USD/close',
-                                 headers={'Authorization': f'Bearer {self.api_key}',
-                                          'Content-Type': 'application/json'},
-                                 data=json.dumps({'longUnits': "ALL"}))
-        close_req.close()
 
     def test_cancel_order(self):
         data = {'order': {"price": '1.2',

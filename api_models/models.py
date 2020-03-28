@@ -32,24 +32,19 @@ class Account:
     def create_order(self, data: dict):
         """
         This method creates an order of the specified type and amount of units
-        :param data:
-        :return:
+        :param data: a dict with the parameters of the order to be created
+        :return: either a dict with information about the new order, or and empty dict if the order failed
         """
         req = requests.post(f'{self.base_url}/accounts/{self.account_id}/orders',
                             json=data,
                             headers={'Authorization': f'Bearer {self.api_key}',
                                      'Accept-Datetime-Format': 'UNIX'})
-        code = req.status_code
-        reason = req.reason
         response = req.json()
         req.close()
-        if code == 201:
-            new_details = get_account(self.account_id, self.api_key, base_url=self.base_url)
-            self.__dict__.update(new_details)
-            order = response.get('orderCreateTransaction', {})
-            return order
-        else:
-            raise AccountError(f'unable to create the specified order. Reason {reason}')
+        new_details = get_account(self.account_id, self.api_key, base_url=self.base_url)
+        self.__dict__.update(new_details)
+        order = response.get('orderCreateTransaction', {})
+        return order
 
     def cancel_order(self, order_id: str):
         """
