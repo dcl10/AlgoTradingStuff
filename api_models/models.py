@@ -2,6 +2,7 @@ import requests
 import os
 import json
 import datetime as dt
+import time
 from api_models.errors import AccountError
 
 
@@ -123,31 +124,50 @@ class Account:
         self.__dict__.update(new_details)
         return result.get('orderCreateTransaction', {})
 
-    def get_candles(self, instrument, since, to, price='M', granularity='S5', count=500):
+    def get_candles(self, instrument: str, start: str = '', end: str = '', price: str = 'M',
+                    granularity: str = 'M1', count: int = 500):
         """
         TODO: turns out the code on github wasn't using the `since` and `to` params.
         TODO: currently getting "Bad Request" with datetime objects. Find out why and fix
-        :param instrument:
-        :param since:
-        :param to:
-        :param price:
-        :param granularity:
-        :param count:
+        :param instrument: the instrument you want the candles for
+        :param start: a date string, in the format 'yyyy-mm-dd hh:mm:ss', for the start point of your data range
+        :param end: a date string, in the format 'yyyy-mm-dd hh:mm:ss', for the end point of your data range
+        :param price: the price point of the candles. 'M' midpoint candles, 'B' bid candles, 'A' ask candles
+        :param granularity: interval of the candles, see http://developer.oanda.com/rest-live-v20/instrument-df/#CandlestickGranularity
+        :param count: how many rows of data to return
         :return:
         """
-        assert since < to, '`since` cannot be greater than or equal to `to`'
-        response = requests.get(f'{self.base_url}/accounts/{self.account_id}/instruments/{instrument}/candles',
-                                headers={'Authorization': f'Bearer {self.api_key}',
-                                         'Accept-Datetime-Format': 'UNIX'},
-                                params={'granularity': granularity, 'price': price, 'from': since, 'to': str(to)})
-        code = response.status_code
-        reason = response.reason
+        start = dt.datetime.strptime(start, '%Y-%m-%d %H:%M:%S').timestamp()
+        end = dt.datetime.strptime(end, '%Y-%m-%d %H:%M:%S').timestamp()
+        assert start < end, '`start` cannot be greater than or equal to `end`'
+        if start != '' and end != '':
+            response = requests.get(f'{self.base_url}/accounts/{self.account_id}/instruments/{instrument}/candles',
+                                    headers={'Authorization': f'Bearer {self.api_key}',
+                                             'Accept-Datetime-Format': 'UNIX'},
+                                    params={'granularity': granularity, 'price': price,
+                                            'from': start, 'to': end})
+        elif start == '' and end != '':
+            response = requests.get(f'{self.base_url}/accounts/{self.account_id}/instruments/{instrument}/candles',
+                                    headers={'Authorization': f'Bearer {self.api_key}',
+                                             'Accept-Datetime-Format': 'UNIX'},
+                                    params={'granularity': granularity, 'price': price,
+                                            'to': end, 'count': count})
+        elif end == '' and start != '':
+            response = requests.get(f'{self.base_url}/accounts/{self.account_id}/instruments/{instrument}/candles',
+                                    headers={'Authorization': f'Bearer {self.api_key}',
+                                             'Accept-Datetime-Format': 'UNIX'},
+                                    params={'granularity': granularity, 'price': price,
+                                            'from': start, 'count': count})
+        else:
+            end = dt.datetime.today().timestamp()
+            response = requests.get(f'{self.base_url}/accounts/{self.account_id}/instruments/{instrument}/candles',
+                                    headers={'Authorization': f'Bearer {self.api_key}',
+                                             'Accept-Datetime-Format': 'UNIX'},
+                                    params={'granularity': granularity, 'price': price,
+                                            'to': end, 'count': count})
         result = response.json()
         response.close()
-        if code == 200:
-            return result.get('candles')
-        else:
-            raise AccountError(f'unable to retrieve data with the specified parameters. Reason {reason}')
+        return result.get('candles', [])
 
 
 def get_accounts(api_key: str, base_url='https://api-fxpractice.oanda.com/v3'):

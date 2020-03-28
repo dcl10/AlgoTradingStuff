@@ -109,19 +109,13 @@ class TestAccount(unittest.TestCase):
         self.assertIsInstance(c_trade_req, dict)
 
     def test_get_candles(self):
-        candles = self.account.get_candles('GBP_USD', since=dt.datetime.today() - dt.timedelta(days=1),
-                                           to=dt.datetime.today())
+        candles = self.account.get_candles('GBP_USD',
+                                           start=(dt.datetime.today() - dt.timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S'),
+                                           end=dt.datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
         self.assertIsInstance(candles, list)
-        self.assertIn('mid', candles[0])
-        self.assertIn('o', candles[0]['mid'])
-        self.assertIn('volume', candles[0])
         self.assertRaises(AssertionError, self.account.get_candles, 'GBP_USD',
-                          since=dt.datetime.today() + dt.timedelta(days=2),
-                          to=dt.datetime.today())
-        self.assertRaises(AccountError,
-                          self.account.get_candles, 'XXX_XXX', since=dt.datetime.today() - dt.timedelta(days=1),
-                          to=dt.datetime.today()
-                          )
+                          start=str((dt.datetime.today() + dt.timedelta(days=2)).strftime('%Y-%m-%d %H:%M:%S')),
+                          end=str(dt.datetime.today().strftime('%Y-%m-%d %H:%M:%S')))
 
 
 class TestStaticMethods(unittest.TestCase):
