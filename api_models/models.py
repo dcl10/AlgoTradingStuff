@@ -88,16 +88,11 @@ class Account:
                                 headers={'Authorization': f'Bearer {self.api_key}',
                                          'Content-Type': 'application/json'},
                                 data=json.dumps({'longUnits': "ALL"}))
-        code = response.status_code
-        reason = response.reason
         result = response.json()
         response.close()
-        if code == 200:
-            new_details = get_account(self.account_id, self.api_key, base_url=self.base_url)
-            self.__dict__.update(new_details)
-            return result
-        else:
-            raise AccountError(f'unable to close position for {instrument}. Reason {reason}')
+        new_details = get_account(self.account_id, self.api_key, base_url=self.base_url)
+        self.__dict__.update(new_details)
+        return result
 
     def get_open_trades(self):
         """

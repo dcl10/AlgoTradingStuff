@@ -79,11 +79,6 @@ class TestAccount(unittest.TestCase):
         close_req.close()
 
     def test_close_position(self):
-        # response = requests.get(f'{self.base_url}/accounts/{self.account_id}',
-        #                         headers={'Authorization': f'Bearer {self.api_key}'})
-        # acc = response.json().get('account', {})
-        # response.close()
-        # account = Account(self.api_key, self.base_url, self.account_id, **acc)
         new_order = {'order': {'type': 'MARKET',
                                'units': '1',
                                'timeInForce': 'FOK',
@@ -94,7 +89,6 @@ class TestAccount(unittest.TestCase):
                                   headers={'Authorization': f'Bearer {self.api_key}'})
         order_req.close()
         self.assertIsInstance(self.account.close_position('GBP_USD'), dict)
-        self.assertRaises(AccountError, self.account.close_position, 'jefjejfe')
 
     def test_get_open_trades(self):
         self.assertEqual(self.account.get_open_trades(), [])
