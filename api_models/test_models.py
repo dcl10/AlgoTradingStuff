@@ -54,16 +54,8 @@ class TestAccount(unittest.TestCase):
                                    headers={'Authorization': f'Bearer {self.api_key}'})
         order_id = orders_req.json().get('orderCreateTransaction').get('id')
         orders_req.close()
-        # account_req = requests.get(f'{self.base_url}/accounts/{self.account_id}',
-        #                            headers={'Authorization': f'Bearer {self.api_key}'})
-        # acc = account_req.json().get('account', {})
-        # account_req.close()
-        # account = Account(self.api_key, self.base_url, self.account_id, **acc)
         result = self.account.cancel_order(order_id)
         self.assertIsInstance(result, dict)
-        self.assertIn('reason', result.keys())
-        self.assertEqual(result['reason'], 'CLIENT_REQUEST')
-        self.assertRaises(AccountError, self.account.cancel_order, 'jeijfiejf')
 
     def test_get_open_positions(self):
         self.assertEqual(self.account.get_open_positions(), [])

@@ -49,23 +49,18 @@ class Account:
     def cancel_order(self, order_id: str):
         """
         This method cancels the specified order
-        :param order_id:
-        :return:
+        :param order_id: the identifier of the order to be cancelled
+        :return: a dict of the details of the cancellation, or a empty dict if the cancellation failed
         """
         response = requests.put(f'{self.base_url}/accounts/{self.account_id}/orders/{order_id}/cancel',
                                 headers={'Authorization': f'Bearer {self.api_key}',
                                          'Accept-Datetime-Format': 'UNIX'})
-        code = response.status_code
-        reason = response.reason
         result = response.json()
         response.close()
-        if code == 200:
-            new_details = get_account(self.account_id, self.api_key, base_url=self.base_url)
-            self.__dict__.update(new_details)
-            cancel = result.get('orderCancelTransaction', {})
-            return cancel
-        else:
-            raise AccountError(f'unable to cancel order {order_id}. Reason {reason}')
+        new_details = get_account(self.account_id, self.api_key, base_url=self.base_url)
+        self.__dict__.update(new_details)
+        cancel = result.get('orderCancelTransaction', {})
+        return cancel
 
     def get_open_positions(self):
         """
