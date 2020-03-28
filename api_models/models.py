@@ -46,7 +46,7 @@ class Account:
         if code == 201:
             new_details = get_account(self.account_id, self.api_key, base_url=self.base_url)
             self.__dict__.update(new_details)
-            order = response.get('orderCreateTransaction')
+            order = response.get('orderCreateTransaction', {})
             return order
         else:
             raise AccountError(f'unable to create the specified order. Reason {reason}')
@@ -122,7 +122,7 @@ class Account:
         result = response.json()
         response.close()
         if code == 200:
-            return result.get('trades')
+            return result.get('trades', [])
         else:
             raise AccountError(f'Could not find any open positions for {self.account_id}. Reason {reason}')
 
@@ -144,7 +144,7 @@ class Account:
         if code == 200:
             new_details = get_account(self.account_id, self.api_key, base_url=self.base_url)
             self.__dict__.update(new_details)
-            return result.get('orderCreateTransaction')
+            return result.get('orderCreateTransaction', {})
         else:
             raise AccountError(f'unable to close trade for {trade_specifier}. Reason {reason}')
 
