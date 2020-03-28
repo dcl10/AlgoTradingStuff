@@ -105,31 +105,8 @@ class TestAccount(unittest.TestCase):
         self.assertIsInstance(trades, list)
 
     def test_close_trade(self):
-        # response = requests.get(f'{self.base_url}/accounts/{self.account_id}',
-        #                         headers={'Authorization': f'Bearer {self.api_key}'})
-        # acc = response.json().get('account', {})
-        # response.close()
-        # account = Account(self.api_key, self.base_url, self.account_id, **acc)
-        new_order = {'order': {'type': 'MARKET',
-                               'units': '1',
-                               'timeInForce': 'FOK',
-                               'instrument': 'GBP_USD',
-                               'positionFill': 'DEFAULT'}}
-        order_req = requests.post(f'{self.base_url}/accounts/{self.account_id}/orders',
-                                  json=new_order,
-                                  headers={'Authorization': f'Bearer {self.api_key}'})
-        order_req.close()
-        trade_req = requests.get(f'{self.base_url}/accounts/{self.account_id}/openTrades',
-                                 headers={'Authorization': f'Bearer {self.api_key}'})
-        trades = trade_req.json().get('trades')
-        trade = trades[0].get('id')
-        trade_req.close()
-        c_trade_req = self.account.close_trade(trade)
+        c_trade_req = self.account.close_trade('0000')
         self.assertIsInstance(c_trade_req, dict)
-        self.assertIn('id', c_trade_req)
-        self.assertIn('accountID', c_trade_req)
-        self.assertIn('instrument', c_trade_req)
-        self.assertRaises(AccountError, self.account.close_trade, 'iejfiuejf')
 
     def test_get_candles(self):
         candles = self.account.get_candles('GBP_USD', since=dt.datetime.today() - dt.timedelta(days=1),

@@ -117,16 +117,11 @@ class Account:
                                          'Content-Type': 'application/json',
                                          'Accept-Datetime-Format': 'UNIX'},
                                 data=json.dumps({'units': "ALL"}))
-        code = response.status_code
-        reason = response.reason
         result = response.json()
         response.close()
-        if code == 200:
-            new_details = get_account(self.account_id, self.api_key, base_url=self.base_url)
-            self.__dict__.update(new_details)
-            return result.get('orderCreateTransaction', {})
-        else:
-            raise AccountError(f'unable to close trade for {trade_specifier}. Reason {reason}')
+        new_details = get_account(self.account_id, self.api_key, base_url=self.base_url)
+        self.__dict__.update(new_details)
+        return result.get('orderCreateTransaction', {})
 
     def get_candles(self, instrument, since, to, price='M', granularity='S5', count=500):
         """
