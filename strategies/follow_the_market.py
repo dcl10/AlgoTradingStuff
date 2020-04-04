@@ -5,6 +5,21 @@ import datetime as dt
 from api_models.models import get_account, Account
 from backtest.backtest import BackTester
 
+
+def vals_from_candles(candles):
+    vals = []
+    for c in candles:
+        if 'mid' in c.keys():
+            vals.append(float(c.get('mid').get('c', 0.0)))
+        elif 'bid' in c.keys():
+            vals.append(float(c.get('bid').get('c', 0.0)))
+        elif 'ask' in c.keys():
+            vals.append(float(c.get('ask').get('c', 0.0)))
+        else:
+            vals.append(0.0)
+    return vals
+
+
 a_parser = argparse.ArgumentParser()
 a_parser.add_argument('config', help='configuration file')
 a_parser.add_argument('-s', '--start', dest='start', help='start date for the back test period',
@@ -30,17 +45,22 @@ base_url = c_parser.get('oanda', 'base_url')
 oanda_account = get_account(base_url=base_url, api_key=api_key, account_id=account_id)
 account = Account(base_url=base_url, account_id=account_id, api_key=api_key, **oanda_account)
 
-candles = account.get_candles(instrument, start=start_date, end=end_date, granularity='W')
+mid_candles = account.get_candles(instrument, start=start_date, end=end_date, granularity='D')
+bid_candles = account.get_candles(instrument, start=start_date, end=end_date, granularity='D', price='B')
+ask_candles = account.get_candles(instrument, start=start_date, end=end_date, granularity='D', price='A')
 
-prices = []
-for c in candles:
-    prices.append(float(c.get('mid').get('o')))
+mid_prices = vals_from_candles(mid_candles)
+bid_prices = vals_from_candles(bid_candles)
+ask_prices = vals_from_candles(ask_candles)
 instructions = [1]
-for i in range(1, len(prices)):
-    if prices[i] > prices[i - 1]:
+prices = [bid_prices[0]]
+for i in range(1, len(mid_prices)):
+    if mid_prices[i] > mid_prices[i - 1]:
         instructions.append(1)
+        prices.append(bid_prices[i])
     else:
         instructions.append(0)
+        prices.append(ask_prices[i])
 
 bt = BackTester(float(account.balance), instructions, prices, margin=0.01)
 bt.run()
