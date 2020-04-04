@@ -127,8 +127,7 @@ class Account:
     def get_candles(self, instrument: str, start: str = '', end: str = '', price: str = 'M',
                     granularity: str = 'M1', count: int = 500):
         """
-        TODO: turns out the code on github wasn't using the `since` and `to` params.
-        TODO: currently getting "Bad Request" with datetime objects. Find out why and fix
+        Get the candle data for a given instrument
         :param instrument: the instrument you want the candles for
         :param start: a date string, in the format 'yyyy-mm-dd hh:mm:ss', for the start point of your data range
         :param end: a date string, in the format 'yyyy-mm-dd hh:mm:ss', for the end point of your data range
