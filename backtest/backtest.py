@@ -43,3 +43,4 @@ class BackTester:
                 self._buy(pri)
             else:
                 self._sell(pri)
+            print(f'{self.result:n}')
