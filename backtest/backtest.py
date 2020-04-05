@@ -52,4 +52,4 @@ class BackTester:
                 self.report['balances'].append(self.result)
         print(f'Balance\tPrice\tAction')
         for b, p, i in zip(self.report['balances'], self.report['prices'], self.report['instructions']):
-            print(f'{b}\t{p}\t{i}')
+            print(f'{b:n}\t{p:n}\t{i}')

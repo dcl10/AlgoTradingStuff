@@ -66,3 +66,23 @@ df['bid+15'] = df['bid'].rolling(15).mean()
 df['ask+3'] = df['ask'].rolling(3).mean()
 df['ask+15'] = df['ask'].rolling(15).mean()
 df.dropna(inplace=True)
+df.reset_index(inplace=True)
+
+instructions = [1]
+prices = [df.loc[0, 'bid']]
+for i in range(1, len(df)):
+    if df.loc[i, 'mid+3'] > df.loc[i, 'mid+15']:
+        prices.append(df.loc[i, 'bid'])
+        instructions.append(1)
+    else:
+        prices.append(df.loc[i, 'ask'])
+        instructions.append(0)
+
+currency_pair = instrument.split('_')
+if account.currency == currency_pair[0]:
+    balance = float(account.balance) * prices[0]
+else:
+    balance = float(account.balance)
+bt = BackTester(balance, instructions, prices, margin=0.01)
+bt.run()
+print(f'{currency_pair[1]} {bt.result - bt.balance:n}')
