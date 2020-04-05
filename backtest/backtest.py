@@ -16,6 +16,11 @@ class BackTester:
         self.margin = margin
         self.prices = prices
         self.result = balance
+        self.report = {'initial_value': self.balance,
+                       'balances': [],
+                       'instructions': ['buy' if i else 'sell' for i in self.instructions],
+                       'prices': self.prices,
+                       'profit': 0.0}
 
     def _sell(self, price: float):
         """
@@ -41,6 +46,9 @@ class BackTester:
         for ins, pri in zip(self.instructions, self.prices):
             if ins:
                 self._buy(pri)
+                self.report['balances'].append(self.result)
             else:
                 self._sell(pri)
-            print(f'{self.result:n}')
+                self.report['balances'].append(self.result)
+        for b, p, i in zip(self.report['balances'], self.report['prices'], self.report['instructions']):
+            print(f'{b}\t{p}\t{i}')
