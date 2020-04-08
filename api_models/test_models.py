@@ -140,5 +140,36 @@ class TestStaticMethods(unittest.TestCase):
         self.assertRaises(AccountError, get_account, 'sifjowsefjwesfj', self.api_key)
 
 
+class TestIntegration(unittest.TestCase):
+
+    def setUp(self) -> None:
+        parser = configparser.ConfigParser()
+        parser.read('oanda.txt')
+        self.api_key = parser['oanda'].get('api_key')
+        self.account_id = parser['oanda'].get('primary_account')
+        self.base_url = parser['oanda'].get('base_url')
+        response = requests.get(f'{self.base_url}/accounts/{self.account_id}',
+                                headers={'Authorization': f'Bearer {self.api_key}'})
+        acc = response.json().get('account', {})
+        response.close()
+        self.account = Account(self.api_key, self.base_url, self.account_id, **acc)
+
+    def tearDown(self) -> None:
+        close_req = requests.put(f'{self.base_url}/accounts/{self.account_id}/positions/GBP_USD/close',
+                                 headers={'Authorization': f'Bearer {self.api_key}',
+                                          'Content-Type': 'application/json'},
+                                 data=json.dumps({'longUnits': "ALL"}))
+        close_req.close()
+
+    def test_create_order(self):
+        new_order = {'order': {'type': 'MARKET',
+                               'units': '1',
+                               'timeInForce': 'FOK',
+                               'instrument': 'GBP_USD',
+                               'positionFill': 'DEFAULT'}}
+        order_response = self.account.create_order(new_order)
+        self.assertIsInstance(order_response, dict)
+
+
 if __name__ == '__main__':
     unittest.main()
