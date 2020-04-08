@@ -179,6 +179,17 @@ class TestIntegration(unittest.TestCase):
         bad_order_response = self.account.create_order(invalid_new_order)
         self.assertEqual({}, bad_order_response)
 
+    def test_close_trade(self):
+        valid_new_order = {'order': {'type': 'MARKET',
+                                     'units': '1',
+                                     'timeInForce': 'FOK',
+                                     'instrument': 'GBP_USD',
+                                     'positionFill': 'DEFAULT'}}
+        order_response = self.account.create_order(valid_new_order)
+        trades = self.account.get_open_trades()
+        c_trade_req = self.account.close_trade(trades[0].get('id', '0000'))
+        self.assertIn('tradeClose', c_trade_req)
+
 
 if __name__ == '__main__':
     unittest.main()
