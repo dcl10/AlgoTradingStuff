@@ -162,13 +162,22 @@ class TestIntegration(unittest.TestCase):
         close_req.close()
 
     def test_create_order(self):
-        new_order = {'order': {'type': 'MARKET',
-                               'units': '1',
-                               'timeInForce': 'FOK',
-                               'instrument': 'GBP_USD',
-                               'positionFill': 'DEFAULT'}}
-        order_response = self.account.create_order(new_order)
-        self.assertIsInstance(order_response, dict)
+        # Test a valid order for one unit of GBP_USD
+        valid_new_order = {'order': {'type': 'MARKET',
+                                     'units': '1',
+                                     'timeInForce': 'FOK',
+                                     'instrument': 'GBP_USD',
+                                     'positionFill': 'DEFAULT'}}
+        order_response = self.account.create_order(valid_new_order)
+        self.assertIn('units', order_response)
+        # Test bad order with non-existent instrument 'USD_GBP'
+        invalid_new_order = {'order': {'type': 'MARKET',
+                                       'units': '1',
+                                       'timeInForce': 'FOK',
+                                       'instrument': 'USD_GBP',
+                                       'positionFill': 'DEFAULT'}}
+        bad_order_response = self.account.create_order(invalid_new_order)
+        self.assertEqual({}, bad_order_response)
 
 
 if __name__ == '__main__':
