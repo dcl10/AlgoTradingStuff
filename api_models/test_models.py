@@ -71,7 +71,6 @@ class TestAccount(unittest.TestCase):
         positions = self.account.get_open_positions()
         self.assertIsInstance(positions, list)
         self.assertIsInstance(positions[0], dict)
-        self.assertIn('instrument', positions[0].keys())
         close_req = requests.put(f'{self.base_url}/accounts/{self.account_id}/positions/{positions[0].get("instrument")}/close',
                                  headers={'Authorization': f'Bearer {self.api_key}',
                                           'Content-Type': 'application/json'},
@@ -162,13 +161,57 @@ class TestIntegration(unittest.TestCase):
         close_req.close()
 
     def test_create_order(self):
+        # Test a valid order for one unit of GBP_USD
+        valid_new_order = {'order': {'type': 'MARKET',
+                                     'units': '1',
+                                     'timeInForce': 'FOK',
+                                     'instrument': 'GBP_USD',
+                                     'positionFill': 'DEFAULT'}}
+        order_response = self.account.create_order(valid_new_order)
+        self.assertIn('units', order_response)
+        # Test bad order with non-existent instrument 'USD_GBP'
+        invalid_new_order = {'order': {'type': 'MARKET',
+                                       'units': '1',
+                                       'timeInForce': 'FOK',
+                                       'instrument': 'USD_GBP',
+                                       'positionFill': 'DEFAULT'}}
+        bad_order_response = self.account.create_order(invalid_new_order)
+        self.assertEqual({}, bad_order_response)
+
+    def test_close_trade(self):
+        valid_new_order = {'order': {'type': 'MARKET',
+                                     'units': '1',
+                                     'timeInForce': 'FOK',
+                                     'instrument': 'GBP_USD',
+                                     'positionFill': 'DEFAULT'}}
+        order_response = self.account.create_order(valid_new_order)
+        trades = self.account.get_open_trades()
+        c_trade_req = self.account.close_trade(trades[0].get('id', '0000'))
+        self.assertIn('tradeClose', c_trade_req)
+
+    def test_get_open_positions(self):
+        self.assertEqual(self.account.get_open_positions(), [])
         new_order = {'order': {'type': 'MARKET',
                                'units': '1',
                                'timeInForce': 'FOK',
                                'instrument': 'GBP_USD',
                                'positionFill': 'DEFAULT'}}
-        order_response = self.account.create_order(new_order)
-        self.assertIsInstance(order_response, dict)
+        order_req = requests.post(f'{self.base_url}/accounts/{self.account_id}/orders',
+                                  json=new_order,
+                                  headers={'Authorization': f'Bearer {self.api_key}'})
+        order_req.close()
+        positions = self.account.get_open_positions()
+        self.assertIsInstance(positions, list)
+        self.assertIsInstance(positions[0], dict)
+        self.assertIn('instrument', positions[0].keys())
+        self.assertIn('unrealizedPL', positions[0].keys())
+        self.assertIn('long', positions[0].keys())
+        self.assertIn('short', positions[0].keys())
+        close_req = requests.put(f'{self.base_url}/accounts/{self.account_id}/positions/{positions[0].get("instrument")}/close',
+                                 headers={'Authorization': f'Bearer {self.api_key}',
+                                          'Content-Type': 'application/json'},
+                                 data=json.dumps({'longUnits': "ALL"}))
+        close_req.close()
 
 
 if __name__ == '__main__':
