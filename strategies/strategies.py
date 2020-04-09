@@ -24,10 +24,12 @@ class BaseStrategy(ABC):
               'D': dt.timedelta(days=1), 'W': dt.timedelta(weeks=1)}
 
     def __init__(self, account: Account, granularity: str = 'D',
-                 start_date: str = (dt.datetime.today() - dt.timedelta(days=60)).strftime('%Y-%m-%d %H:%M:%S')):
+                 start_date: str = (dt.datetime.today() - dt.timedelta(days=60)).strftime('%Y-%m-%d %H:%M:%S'),
+                 close_date: str = (dt.datetime.today() + dt.timedelta(days=60)).strftime('%Y-%m-%d %H:%M:%S')):
         self.account = account
         self.granularity = granularity
         self.start_date = start_date
+        self.close_date = dt.datetime.strptime(close_date, '%Y-%m-%d %H:%M:%S')
 
     @abstractmethod
     def run(self):
@@ -44,4 +46,5 @@ class FollowMarketStrategy(BaseStrategy):
         pass
 
     def run(self):
-        pass
+        while not dt.datetime.today() >= self.close_date:
+            print('Please give instructions.')
