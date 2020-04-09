@@ -50,6 +50,4 @@ class BackTester:
             else:
                 self._sell(pri)
                 self.report['balances'].append(self.result)
-        print(f'Balance\tPrice\tAction')
-        for b, p, i in zip(self.report['balances'], self.report['prices'], self.report['instructions']):
-            print(f'{b:n}\t{p:n}\t{i}')
+        return self.result >= self.balance

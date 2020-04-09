@@ -23,8 +23,7 @@ class BaseStrategy(ABC):
     deltas = {'H1': dt.timedelta(hours=1), 'H6': dt.timedelta(hours=6), 'H12': dt.timedelta(hours=12),
               'D': dt.timedelta(days=1), 'W': dt.timedelta(weeks=1)}
 
-    def __init__(self, account: Account, granularity: str = 'D',
-                 start_date: str = (dt.datetime.today() - dt.timedelta(days=60)).strftime('%Y-%m-%d %H:%M:%S'),
+    def __init__(self, account: Account, start_date: str, granularity: str = 'D',
                  close_date: str = (dt.datetime.today() + dt.timedelta(days=60)).strftime('%Y-%m-%d %H:%M:%S')):
         self.account = account
         self.granularity = granularity
