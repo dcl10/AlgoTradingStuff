@@ -31,6 +31,11 @@ class BaseStrategy(ABC):
         self.instrument = instrument
         self.close_date = dt.datetime.strptime(close_date, '%Y-%m-%d %H:%M:%S')
 
+    def _check_time(self, time: dt.datetime):
+        is_weekday = 0 < time.day < 5
+        is_trading_hours = dt.time(9, 0, 0) < time.time() < dt.time(17, 0, 0)
+        return is_weekday and is_trading_hours
+
     @abstractmethod
     def run(self):
         pass
@@ -42,7 +47,7 @@ class FollowMarketStrategy(BaseStrategy):
         previous_time = dt.datetime.now()
         while not dt.datetime.today() >= self.close_date:
             current_time = dt.datetime.now()
-            if current_time >= previous_time + self.deltas[self.granularity]:
+            if current_time >= previous_time + self.deltas[self.granularity] and self._check_time(current_time):
                 print(f'Placing order at {current_time.strftime("%Y-%m-%d %H:%M:%S")}')
                 previous_time = dt.datetime.now()
 
