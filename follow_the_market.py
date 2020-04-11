@@ -59,15 +59,21 @@ if __name__ == '__main__':
 
     currency_pair = instrument.split('_')
     if account.currency == currency_pair[0]:
-        balance = float(account.balance) * prices[0]
+        balance = float(account.balance) * prices[-1]
     else:
         balance = float(account.balance)
 
     bt = BackTester(balance, instructions, prices, margin=0.01)
     run_irl = bt.run()
-    print(f'{currency_pair[1]} {bt.result - bt.balance:n}')
     if run_irl:
         strat = FollowMarketStrategy(account, granularity,
                                      (dt.datetime.today() - dt.timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S'),
                                      close_date=(dt.datetime.today() + dt.timedelta(seconds=10)).strftime('%Y-%m-%d %H:%M:%S'))
         strat.run()
+
+    print(f'Result of backtest: {currency_pair[1]} {(bt.result - bt.balance):n}')
+    if account.currency == currency_pair[0]:
+        final_balance = float(account.balance) * prices[-1]
+    else:
+        final_balance = float(account.balance)
+    print(f'Result of real trading: {currency_pair[1]} {(final_balance - balance):n}')

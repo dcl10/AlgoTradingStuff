@@ -47,3 +47,6 @@ class FollowMarketStrategy(BaseStrategy):
     def run(self):
         while not dt.datetime.today() >= self.close_date:
             print('Please give instructions.')
+        open_positions = self.account.get_open_positions()
+        for op in open_positions:
+            self.account.close_position(op.get('instrument', ''))
