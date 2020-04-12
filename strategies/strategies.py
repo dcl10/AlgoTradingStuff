@@ -44,11 +44,41 @@ class BaseStrategy(ABC):
 class FollowMarketStrategy(BaseStrategy):
 
     def run(self):
+        balanace_at_start = float(self.account.balance)
         previous_time = dt.datetime.now()
+        new_order = {'order': {'type': 'MARKET',
+                               'units': '',
+                               'timeInForce': 'FOK',
+                               'instrument': self.instrument,
+                               'positionFill': 'DEFAULT'}}
         while not dt.datetime.today() >= self.close_date:
             current_time = dt.datetime.now()
             if current_time >= previous_time + self.deltas[self.granularity] and self._check_time(current_time):
                 print(f'Placing order at {current_time.strftime("%Y-%m-%d %H:%M:%S")}')
+                open_trades = self.account.get_open_trades()
+                for ot in open_trades:
+                    self.account.close_trade(ot.get('id', ''))
+                mid_candles = self.account.get_candles(self.instrument,
+                                                       start=self.start_date,
+                                                       end=current_time.strftime("%Y-%m-%d %H:%M:%S"), price='M',
+                                                       granularity=self.granularity)
+                bid_candles = self.account.get_candles(self.instrument,
+                                                       start=self.start_date,
+                                                       end=current_time.strftime("%Y-%m-%d %H:%M:%S"), price='B',
+                                                       granularity=self.granularity)
+                ask_candles = self.account.get_candles(self.instrument,
+                                                       start=self.start_date,
+                                                       end=current_time.strftime("%Y-%m-%d %H:%M:%S"), price='A',
+                                                       granularity=self.granularity)
+                mid_prices = vals_from_candles(mid_candles)
+                # bid_prices = vals_from_candles(bid_candles)
+                # ask_prices = vals_from_candles(ask_candles)
+                if mid_prices[-1] > mid_prices[-2]:
+                    new_order['units'] = str(-(0.01 * balanace_at_start))  # negative units sells base currency
+                    self.account.create_order(new_order)
+                else:
+                    new_order['units'] = str(0.01 * balanace_at_start)  # positive units buys base currency
+                    self.account.create_order(new_order)
                 previous_time = dt.datetime.now()
 
         open_positions = self.account.get_open_positions()
