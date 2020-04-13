@@ -31,9 +31,9 @@ class BaseStrategy(ABC):
         self.instrument = instrument
         self.close_date = dt.datetime.strptime(close_date, '%Y-%m-%d %H:%M:%S')
 
-    def _check_time(self, time: dt.datetime):
-        is_weekday = 0 < time.day < 5
-        is_trading_hours = dt.time(9, 0, 0) < time.time() < dt.time(17, 0, 0)
+    def _check_time(self, c_time: dt.datetime):
+        is_weekday = 0 <= c_time.weekday() <= 5
+        is_trading_hours = dt.time(9, 0, 0) < c_time.time() < dt.time(17, 0, 0)
         return is_weekday and is_trading_hours
 
     @abstractmethod
@@ -74,10 +74,12 @@ class FollowMarketStrategy(BaseStrategy):
                 # bid_prices = vals_from_candles(bid_candles)
                 # ask_prices = vals_from_candles(ask_candles)
                 if mid_prices[-1] > mid_prices[-2]:
-                    new_order['units'] = str(-(0.01 * balanace_at_start))  # negative units sells base currency
+                    new_order['order']['units'] = f'{-(0.01 * balanace_at_start):.2f}'  # negative units sells base currency
+                    # print(new_order)
                     self.account.create_order(new_order)
                 else:
-                    new_order['units'] = str(0.01 * balanace_at_start)  # positive units buys base currency
+                    new_order['order']['units'] = f'{(0.01 * balanace_at_start):.2f}'  # positive units buys base currency
+                    # print(new_order)
                     self.account.create_order(new_order)
                 previous_time = dt.datetime.now()
 

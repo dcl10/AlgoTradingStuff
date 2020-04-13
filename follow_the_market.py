@@ -71,9 +71,9 @@ if __name__ == '__main__':
                                      close_date=(dt.datetime.today() + dt.timedelta(minutes=5)).strftime('%Y-%m-%d %H:%M:%S'))
         strat.run()
 
-    print(f'Result of backtest: {currency_pair[1]} {(bt.result - bt.balance):n}')
+    print(f'Result of backtest: {currency_pair[1]} {(bt.result - bt.balance):.2f}')
     if account.currency == currency_pair[0]:
         final_balance = float(account.balance) * prices[-1]
     else:
         final_balance = float(account.balance)
-    print(f'Result of real trading: {currency_pair[1]} {(final_balance - balance):n}')
+    print(f'Result of real trading: {currency_pair[1]} {(final_balance - balance):.2f}')
