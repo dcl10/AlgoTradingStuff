@@ -55,9 +55,6 @@ class FollowMarketStrategy(BaseStrategy):
             current_time = dt.datetime.now()
             if current_time >= previous_time + self.deltas[self.granularity] and self._check_time(current_time):
                 print(f'Placing order at {current_time.strftime("%Y-%m-%d %H:%M:%S")}')
-                open_trades = self.account.get_open_trades()
-                for ot in open_trades:
-                    self.account.close_trade(ot.get('id', ''))
                 mid_candles = self.account.get_candles(self.instrument,
                                                        start=self.start_date,
                                                        end=current_time.strftime("%Y-%m-%d %H:%M:%S"), price='M',
@@ -70,6 +67,9 @@ class FollowMarketStrategy(BaseStrategy):
                     new_order['order']['units'] = f'{(0.01 * balanace_at_start):.2f}'  # positive units buys base currency
                     self.account.create_order(new_order)
                 previous_time = dt.datetime.now()
+            open_trades = self.account.get_open_trades()
+            for ot in open_trades:
+                self.account.close_trade(ot.get('id', ''))
 
         open_positions = self.account.get_open_positions()
         for op in open_positions:

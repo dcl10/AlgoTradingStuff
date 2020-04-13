@@ -14,7 +14,7 @@ a_parser.add_argument('-s', '--start', dest='start', help='start date for the ba
 a_parser.add_argument('-e', '--end', dest='end', help='end date for the back test period',
                       default=dt.datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
 a_parser.add_argument('-c', '--close', dest='close', help='the close date for the position',
-                      default=(dt.datetime.today() + dt.timedelta(days=60)).strftime('%Y-%m-%d %H:%M:%S'))
+                      default=(dt.datetime.today() + dt.timedelta(minutes=60)).strftime('%Y-%m-%d %H:%M:%S'))
 a_parser.add_argument('-i', '--instrument', dest='instrument', help='the instrument to back test', default='GBP_USD')
 a_parser.add_argument('-g', '--granularity', dest='granularity', help='the spacing between the candles', default='M1')
 
@@ -65,13 +65,13 @@ if __name__ == '__main__':
 
     bt = BackTester(balance, instructions, prices, margin=0.01)
     run_irl = bt.run()
+    print(f'Result of backtest: {currency_pair[1]} {(bt.result - bt.balance):.2f}')
     if run_irl:
         strat = FollowMarketStrategy(account=account, instrument=instrument, granularity=granularity,
                                      start_date=start_date,
-                                     close_date=(dt.datetime.today() + dt.timedelta(minutes=5)).strftime('%Y-%m-%d %H:%M:%S'))
+                                     close_date=close_date)
         strat.run()
 
-    print(f'Result of backtest: {currency_pair[1]} {(bt.result - bt.balance):.2f}')
     if account.currency == currency_pair[0]:
         final_balance = float(account.balance) * prices[-1]
     else:
