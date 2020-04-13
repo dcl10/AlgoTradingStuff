@@ -33,8 +33,8 @@ class BaseStrategy(ABC):
 
     def _check_time(self, c_time: dt.datetime):
         is_weekday = 0 <= c_time.weekday() < 5
-        is_trading_hours = dt.time(9, 0, 0) < c_time.time() < dt.time(17, 0, 0)
-        return is_weekday and is_trading_hours
+        # is_trading_hours = dt.time(9, 0, 0) < c_time.time() < dt.time(17, 0, 0)
+        return is_weekday   # and is_trading_hours
 
     @abstractmethod
     def run(self):
@@ -56,16 +56,16 @@ class FollowMarketStrategy(BaseStrategy):
             if current_time >= previous_time + self.deltas[self.granularity] and self._check_time(current_time):
                 print(f'Placing order at {current_time.strftime("%Y-%m-%d %H:%M:%S")}')
                 mid_candles = self.account.get_candles(self.instrument,
-                                                       start=self.start_date,
+                                                       start=previous_time.strftime("%Y-%m-%d %H:%M:%S"),
                                                        end=current_time.strftime("%Y-%m-%d %H:%M:%S"), price='M',
                                                        granularity=self.granularity)
                 mid_prices = vals_from_candles(mid_candles)
                 if mid_prices[-1] > mid_prices[-2]:
-                    new_order['order']['units'] = f'{-(0.01 * balanace_at_start):.2f}'  # negative units sells base currency
-                    self.account.create_order(new_order)
+                    new_order['order']['units'] = f'{int(-(0.01 * balanace_at_start))}'  # negative units sells base currency
+                    # self.account.create_order(new_order)
                 else:
-                    new_order['order']['units'] = f'{(0.01 * balanace_at_start):.2f}'  # positive units buys base currency
-                    self.account.create_order(new_order)
+                    new_order['order']['units'] = f'{int((0.01 * balanace_at_start))}'  # positive units buys base currency
+                    # self.account.create_order(new_order)
                 previous_time = dt.datetime.now()
             open_trades = self.account.get_open_trades()
             for ot in open_trades:

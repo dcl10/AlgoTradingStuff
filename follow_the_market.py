@@ -52,10 +52,10 @@ if __name__ == '__main__':
     for i in range(1, len(mid_prices)):
         if mid_prices[i] > mid_prices[i - 1]:
             instructions.append(1)
-            prices.append(bid_prices[i])
+            prices.append(ask_prices[i])
         else:
             instructions.append(0)
-            prices.append(ask_prices[i])
+            prices.append(bid_prices[i])
 
     currency_pair = instrument.split('_')
     if account.currency == currency_pair[0]:
