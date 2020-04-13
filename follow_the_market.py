@@ -14,7 +14,7 @@ a_parser.add_argument('-s', '--start', dest='start', help='start date for the ba
 a_parser.add_argument('-e', '--end', dest='end', help='end date for the back test period',
                       default=dt.datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
 a_parser.add_argument('-c', '--close', dest='close', help='the close date for the position',
-                      default=(dt.datetime.today() + dt.timedelta(minutes=60)).strftime('%Y-%m-%d %H:%M:%S'))
+                      default=(dt.datetime.today() + dt.timedelta(minutes=5)).strftime('%Y-%m-%d %H:%M:%S'))
 a_parser.add_argument('-i', '--instrument', dest='instrument', help='the instrument to back test', default='GBP_USD')
 a_parser.add_argument('-g', '--granularity', dest='granularity', help='the spacing between the candles', default='M1')
 
