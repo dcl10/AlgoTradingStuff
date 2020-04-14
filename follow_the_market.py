@@ -47,25 +47,19 @@ if __name__ == '__main__':
     bid_prices = vals_from_candles(bid_candles)
     ask_prices = vals_from_candles(ask_candles)
 
-    instructions = [1]
-    prices = [bid_prices[0]]
-    for i in range(1, len(mid_prices)):
-        if mid_prices[i] > mid_prices[i - 1]:
-            instructions.append(1)
-            prices.append(ask_prices[i])
-        else:
-            instructions.append(0)
-            prices.append(bid_prices[i])
+    instructions = [1, 0]
 
     currency_pair = instrument.split('_')
     if account.currency == currency_pair[0]:
-        balance = float(account.balance) * prices[-1]
+        prices = [1 / ask_prices[0], 1 / bid_prices[-1]]
     else:
-        balance = float(account.balance)
+        prices = [ask_prices[0], bid_prices[-1]]
 
-    bt = BackTester(balance, instructions, prices, margin=0.01)
+    bt = BackTester(float(account.balance), instructions, prices, margin=0.01)
     run_irl = bt.run()
-    print(f'Result of backtest: {currency_pair[1]} {(bt.result - bt.balance):.2f}')
+    print(f'Result of backtest: {currency_pair[0]} {(bt.result - bt.balance):.2f}')
+    print('Price at start:', ask_prices[0], 'Price at end:', bid_prices[-1])
+    exit()
     if run_irl:
         strat = FollowMarketStrategy(account=account, instrument=instrument, granularity=granularity,
                                      start_date=start_date,

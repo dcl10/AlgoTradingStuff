@@ -28,7 +28,7 @@ class BackTester:
         :param price: the price at which to sell
         :return:
         """
-        self.result += (self.margin * self.balance) / price
+        self.result += (self.margin * self.balance) * price
 
     def _buy(self, price: float):
         """
@@ -36,7 +36,7 @@ class BackTester:
         :param: the price at to buy
         :return:
         """
-        self.result -= (self.margin * self.balance) / price
+        self.result -= (self.margin * self.balance) * price
 
     def run(self):
         """
