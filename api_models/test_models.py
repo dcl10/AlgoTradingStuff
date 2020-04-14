@@ -112,9 +112,8 @@ class TestAccount(unittest.TestCase):
                                            start=(dt.datetime.today() - dt.timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S'),
                                            end=dt.datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
         self.assertIsInstance(candles, list)
-        self.assertRaises(AssertionError, self.account.get_candles, 'GBP_USD',
-                          start=str((dt.datetime.today() + dt.timedelta(days=2)).strftime('%Y-%m-%d %H:%M:%S')),
-                          end=str(dt.datetime.today().strftime('%Y-%m-%d %H:%M:%S')))
+        one_candle = self.account.get_candles('GBP_USD', count=1)
+        self.assertEqual(len(one_candle), 1)
 
 
 class TestStaticMethods(unittest.TestCase):

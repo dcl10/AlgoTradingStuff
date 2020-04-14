@@ -136,34 +136,37 @@ class Account:
         :param count: how many rows of data to return
         :return:
         """
-        start = dt.datetime.strptime(start, '%Y-%m-%d %H:%M:%S').timestamp()
-        end = dt.datetime.strptime(end, '%Y-%m-%d %H:%M:%S').timestamp()
-        assert start < end, '`start` cannot be greater than or equal to `end`'
+        # start = dt.datetime.strptime(start, '%Y-%m-%d %H:%M:%S').timestamp()
+        # end = dt.datetime.strptime(end, '%Y-%m-%d %H:%M:%S').timestamp()
+        # assert start < end, '`start` cannot be greater than or equal to `end`'
         if start != '' and end != '':
+            start = dt.datetime.strptime(start, '%Y-%m-%d %H:%M:%S').timestamp()
+            end = dt.datetime.strptime(end, '%Y-%m-%d %H:%M:%S').timestamp()
             response = requests.get(f'{self.base_url}/accounts/{self.account_id}/instruments/{instrument}/candles',
                                     headers={'Authorization': f'Bearer {self.api_key}',
                                              'Accept-Datetime-Format': 'UNIX'},
                                     params={'granularity': granularity, 'price': price,
                                             'from': start, 'to': end})
         elif start == '' and end != '':
+            end = dt.datetime.strptime(end, '%Y-%m-%d %H:%M:%S').timestamp()
             response = requests.get(f'{self.base_url}/accounts/{self.account_id}/instruments/{instrument}/candles',
                                     headers={'Authorization': f'Bearer {self.api_key}',
                                              'Accept-Datetime-Format': 'UNIX'},
                                     params={'granularity': granularity, 'price': price,
                                             'to': end, 'count': count})
         elif end == '' and start != '':
+            start = dt.datetime.strptime(start, '%Y-%m-%d %H:%M:%S').timestamp()
             response = requests.get(f'{self.base_url}/accounts/{self.account_id}/instruments/{instrument}/candles',
                                     headers={'Authorization': f'Bearer {self.api_key}',
                                              'Accept-Datetime-Format': 'UNIX'},
                                     params={'granularity': granularity, 'price': price,
                                             'from': start, 'count': count})
         else:
-            end = dt.datetime.today().timestamp()
             response = requests.get(f'{self.base_url}/accounts/{self.account_id}/instruments/{instrument}/candles',
                                     headers={'Authorization': f'Bearer {self.api_key}',
                                              'Accept-Datetime-Format': 'UNIX'},
                                     params={'granularity': granularity, 'price': price,
-                                            'to': end, 'count': count})
+                                            'count': count})
         result = response.json()
         response.close()
         return result.get('candles', [])
