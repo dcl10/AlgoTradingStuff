@@ -46,32 +46,14 @@ class FollowMarketStrategy(BaseStrategy):
 
     def run(self):
         balanace_at_start = float(self.account.balance)
-        previous_time = dt.datetime.now()
         new_order = {'order': {'type': 'MARKET',
-                               'units': '',
+                               'units': f'{int((0.01 * balanace_at_start))}',
                                'timeInForce': 'FOK',
                                'instrument': self.instrument,
                                'positionFill': 'DEFAULT'}}
+        self.account.create_order(new_order)
         while not dt.datetime.today() >= self.close_date:
-            current_time = dt.datetime.now()
-            if current_time >= previous_time + self.deltas[self.granularity] and self._check_time(current_time):
-                open_trades = self.account.get_open_trades()
-                for ot in open_trades:
-                    self.account.close_trade(ot.get('id', ''))
-                print(f'Placing order at {current_time.strftime("%Y-%m-%d %H:%M:%S")}')
-                mid_candles = self.account.get_candles(self.instrument,
-                                                       start=previous_time.strftime("%Y-%m-%d %H:%M:%S"),
-                                                       end=current_time.strftime("%Y-%m-%d %H:%M:%S"), price='M',
-                                                       granularity=self.granularity)
-                mid_prices = vals_from_candles(mid_candles)
-                if mid_prices[-1] > mid_prices[-2]:
-                    new_order['order']['units'] = f'{int(-(0.01 * balanace_at_start))}'
-                    self.account.create_order(new_order)
-                else:
-                    new_order['order']['units'] = f'{int((0.01 * balanace_at_start))}'
-                    self.account.create_order(new_order)
-                previous_time = dt.datetime.now()
-        time.sleep(5)  # wait for the last order to go through
+            time.sleep(1)
         open_positions = self.account.get_open_positions()
         for op in open_positions:
             self.account.close_position(op.get('instrument', ''))

@@ -14,7 +14,7 @@ a_parser.add_argument('-s', '--start', dest='start', help='start date for the ba
 a_parser.add_argument('-e', '--end', dest='end', help='end date for the back test period',
                       default=dt.datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
 a_parser.add_argument('-c', '--close', dest='close', help='the close date for the position',
-                      default=(dt.datetime.today() + dt.timedelta(minutes=5)).strftime('%Y-%m-%d %H:%M:%S'))
+                      default=(dt.datetime.today() + dt.timedelta(minutes=10)).strftime('%Y-%m-%d %H:%M:%S'))
 a_parser.add_argument('-i', '--instrument', dest='instrument', help='the instrument to back test', default='GBP_USD')
 a_parser.add_argument('-g', '--granularity', dest='granularity', help='the spacing between the candles', default='M1')
 
@@ -55,10 +55,11 @@ if __name__ == '__main__':
     else:
         prices = [ask_prices[0], bid_prices[-1]]
 
-    bt = BackTester(float(account.balance), instructions, prices, margin=0.01)
+    balance = float(account.balance)
+    bt = BackTester(balance, instructions, prices, margin=0.01)
     run_irl = bt.run()
     print(f'Result of backtest: {currency_pair[0]} {(bt.result - bt.balance):.2f}')
-    print('Price at start:', ask_prices[0], 'Price at end:', bid_prices[-1])
+    print(f'Price at start: {currency_pair[1]} {ask_prices[0]} Price at end: {currency_pair[1]} {bid_prices[-1]}')
     exit()
     if run_irl:
         strat = FollowMarketStrategy(account=account, instrument=instrument, granularity=granularity,
@@ -66,8 +67,5 @@ if __name__ == '__main__':
                                      close_date=close_date)
         strat.run()
 
-    if account.currency == currency_pair[0]:
-        final_balance = float(account.balance) * prices[-1]
-    else:
-        final_balance = float(account.balance)
-    print(f'Result of real trading: {currency_pair[1]} {(final_balance - balance):.2f}')
+    final_balance = float(account.balance)
+    print(f'Result of real trading: {currency_pair[0]} {(final_balance - balance):.2f}')
