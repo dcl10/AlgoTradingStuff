@@ -58,9 +58,9 @@ if __name__ == '__main__':
     balance = float(account.balance)
     bt = BackTester(balance, instructions, prices, margin=0.01)
     run_irl = bt.run()
-    print(f'Result of backtest: {currency_pair[0]} {(bt.result - bt.balance):.2f}')
+    print(f'Result of backtest: {currency_pair[0]} {(bt.result - bt.balance)}')
     print(f'Price at start: {currency_pair[1]} {ask_prices[0]} Price at end: {currency_pair[1]} {bid_prices[-1]}')
-    exit()
+    # exit()
     if run_irl:
         strat = FollowMarketStrategy(account=account, instrument=instrument, granularity=granularity,
                                      start_date=start_date,
@@ -68,4 +68,4 @@ if __name__ == '__main__':
         strat.run()
 
     final_balance = float(account.balance)
-    print(f'Result of real trading: {currency_pair[0]} {(final_balance - balance):.2f}')
+    print(f'Result of real trading: {currency_pair[0]} {(final_balance - balance)}')
