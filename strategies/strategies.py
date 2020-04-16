@@ -58,3 +58,21 @@ class FollowMarketStrategy(BaseStrategy):
         open_positions = self.account.get_open_positions()
         for op in open_positions:
             self.account.close_position(op.get('instrument', ''))
+
+
+class CrossOverStrategy(BaseStrategy):
+
+    def run(self):
+        balance_at_start = float(self.account.balance)
+        new_order = {'order': {'type': 'MARKET',
+                               'units': f'{int((self.margin * balance_at_start))}',
+                               'timeInForce': 'FOK',
+                               'instrument': self.instrument,
+                               'positionFill': 'DEFAULT'}}
+        self.account.create_order(new_order)
+        while not dt.datetime.today() >= self.close_date:
+            # TODO: implement logic for crossover strategy
+            pass
+        open_positions = self.account.get_open_positions()
+        for op in open_positions:
+            self.account.close_position(op.get('instrument', ''))
