@@ -63,12 +63,12 @@ if __name__ == '__main__':
 
     currency_pair = instrument.split('_')
     instructions = [1]
-    prices = [df.loc[0, 'bid']]
+    prices = [df.loc[0, 'ask']]
     for i in range(1, len(df)):
-        if df.loc[i, 'mid+3'] > df.loc[i, 'mid+15'] and df.loc[i - 1, 'mid+3'] < df.loc[i, 'mid+3']:
+        if df.loc[i, 'mid+3'] > df.loc[i, 'mid+15'] and df.loc[i - 1, 'mid+3'] < df.loc[i - 1, 'mid+15']:
             prices.append(df.loc[i, 'bid'])
             instructions.append(0)
-        elif df.loc[i, 'mid+3'] < df.loc[i, 'mid+15'] and df.loc[i - 1, 'mid+3'] > df.loc[i, 'mid+3']:
+        elif df.loc[i, 'mid+3'] < df.loc[i, 'mid+15'] and df.loc[i - 1, 'mid+3'] > df.loc[i - 1, 'mid+15']:
             prices.append(df.loc[i, 'ask'])
             instructions.append(1)
     prices.append(bid_prices[-1])
