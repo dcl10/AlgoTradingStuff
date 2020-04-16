@@ -19,23 +19,24 @@ def vals_from_candles(candles):
     return vals
 
 
+def check_time():
+    is_weekday = 0 <= dt.datetime.today().weekday() < 5
+    return is_weekday
+
+
 class BaseStrategy(ABC):
 
     deltas = {'M1': dt.timedelta(minutes=1), 'H1': dt.timedelta(hours=1), 'H6': dt.timedelta(hours=6),
               'H12': dt.timedelta(hours=12), 'D': dt.timedelta(days=1), 'W': dt.timedelta(weeks=1)}
 
-    def __init__(self, account: Account, instrument: str, start_date: str, granularity: str = 'D',
-                 close_date: str = (dt.datetime.today() + dt.timedelta(days=60)).strftime('%Y-%m-%d %H:%M:%S')):
+    def __init__(self, account: Account, instrument: str, granularity: str = 'D',
+                 close_date: str = (dt.datetime.today() + dt.timedelta(days=60)).strftime('%Y-%m-%d %H:%M:%S'),
+                 margin: float = 0.01):
         self.account = account
         self.granularity = granularity
-        self.start_date = start_date
         self.instrument = instrument
         self.close_date = dt.datetime.strptime(close_date, '%Y-%m-%d %H:%M:%S')
-
-    def _check_time(self, c_time: dt.datetime):
-        is_weekday = 0 <= c_time.weekday() < 5
-        # is_trading_hours = dt.time(9, 0, 0) < c_time.time() < dt.time(17, 0, 0)
-        return is_weekday   # and is_trading_hours
+        self.margin = margin
 
     @abstractmethod
     def run(self):
@@ -45,9 +46,9 @@ class BaseStrategy(ABC):
 class FollowMarketStrategy(BaseStrategy):
 
     def run(self):
-        balanace_at_start = float(self.account.balance)
+        balance_at_start = float(self.account.balance)
         new_order = {'order': {'type': 'MARKET',
-                               'units': f'{int((0.01 * balanace_at_start))}',
+                               'units': f'{int((self.margin * balance_at_start))}',
                                'timeInForce': 'FOK',
                                'instrument': self.instrument,
                                'positionFill': 'DEFAULT'}}
