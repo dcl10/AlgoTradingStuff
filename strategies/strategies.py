@@ -1,5 +1,6 @@
 import datetime as dt
 import time
+import pandas as pd
 from abc import ABC, abstractmethod
 
 from api_models.models import Account
@@ -64,15 +65,28 @@ class CrossOverStrategy(BaseStrategy):
 
     def run(self):
         balance_at_start = float(self.account.balance)
-        new_order = {'order': {'type': 'MARKET',
-                               'units': f'{int((self.margin * balance_at_start))}',
-                               'timeInForce': 'FOK',
-                               'instrument': self.instrument,
-                               'positionFill': 'DEFAULT'}}
-        self.account.create_order(new_order)
+        # new_order = {'order': {'type': 'MARKET',
+        #                        'units': f'{int((self.margin * balance_at_start))}',
+        #                        'timeInForce': 'FOK',
+        #                        'instrument': self.instrument,
+        #                        'positionFill': 'DEFAULT'}}
+        # self.account.create_order(new_order)
         while not dt.datetime.today() >= self.close_date:
             # TODO: implement logic for crossover strategy
+            bid_candles = self.account.get_candles(self.instrument, granularity=self.granularity, count=30, price='B')
+            bid_prices = vals_from_candles(bid_candles)
+            mid_candles = self.account.get_candles(self.instrument, granularity=self.granularity, count=30, price='M')
+            mid_prices = vals_from_candles(mid_candles)
+            ask_candles = self.account.get_candles(self.instrument, granularity=self.granularity, count=30, price='A')
+            ask_prices = vals_from_candles(ask_candles)
+            df = pd.DataFrame({'bid': bid_prices, 'mid': mid_prices, 'ask': ask_prices})
+            df['mid+3'] = df['bid'].rolling(3).mean()
+            df['mid+15'] = df['bid'].rolling(15).mean()
+            df.dropna(inplace=True)
+            df.reset_index(inplace=True, drop=True)
+            print(df.tail())
+            exit()
             pass
-        open_positions = self.account.get_open_positions()
-        for op in open_positions:
-            self.account.close_position(op.get('instrument', ''))
+        # open_positions = self.account.get_open_positions()
+        # for op in open_positions:
+        #     self.account.close_position(op.get('instrument', ''))

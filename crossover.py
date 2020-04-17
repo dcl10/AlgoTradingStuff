@@ -59,7 +59,7 @@ if __name__ == '__main__':
     df['ask+3'] = df['ask'].rolling(3).mean()
     df['ask+15'] = df['ask'].rolling(15).mean()
     df.dropna(inplace=True)
-    df.reset_index(inplace=True)
+    df.reset_index(inplace=True, drop=True)
 
     currency_pair = instrument.split('_')
     instructions = [1]
@@ -72,7 +72,7 @@ if __name__ == '__main__':
             prices.append(df.loc[i, 'ask'])
             instructions.append(1)
     prices.append(bid_prices[-1])
-    instructions.append(0)
+    instructions.append(int(not instructions[-1]))
 
     if account.currency == currency_pair[0]:
         prices = [1 / p for p in prices]
@@ -83,11 +83,11 @@ if __name__ == '__main__':
     print(f'Result of backtest: {currency_pair[0]} {(bt.result - bt.balance)}')
     print(f'Price at start: {currency_pair[1]} {ask_prices[0]} Price at end: {currency_pair[1]} {bid_prices[-1]}')
     print(len(instructions))
-    exit()
-    if run_irl and check_time():
-        strat = CrossOverStrategy(account=account, instrument=instrument, granularity=granularity,
-                                  close_date=close_date)
-        strat.run()
+    # exit()
+    # if run_irl and check_time():
+    strat = CrossOverStrategy(account=account, instrument=instrument, granularity=granularity,
+                              close_date=close_date)
+    strat.run()
 
     final_balance = float(account.balance)
     print(f'Result of real trading: {currency_pair[0]} {(final_balance - balance)}')
