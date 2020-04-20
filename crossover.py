@@ -2,9 +2,10 @@ import sys
 import configparser
 import argparse
 import datetime as dt
+import pandas as pd
 from api_models.models import get_account, Account
 from backtest.backtest import BackTester
-from strategies.strategies import FollowMarketStrategy, vals_from_candles, check_time
+from strategies.strategies import CrossOverStrategy, vals_from_candles, check_time
 
 
 a_parser = argparse.ArgumentParser()
@@ -47,27 +48,50 @@ if __name__ == '__main__':
     bid_prices = vals_from_candles(bid_candles)
     ask_prices = vals_from_candles(ask_candles)
 
-    instructions = [1, 0]
-    prices = [ask_prices[0], bid_prices[-1]]
+    df = pd.DataFrame({'mid': mid_prices, 'bid': bid_prices, 'ask': ask_prices})
+    # Mid point prices
+    df['mid+3'] = df['mid'].rolling(3).mean()
+    df['mid+15'] = df['mid'].rolling(15).mean()
+    # Bid prices
+    df['bid+3'] = df['bid'].rolling(3).mean()
+    df['bid+15'] = df['bid'].rolling(15).mean()
+    # Ask prices
+    df['ask+3'] = df['ask'].rolling(3).mean()
+    df['ask+15'] = df['ask'].rolling(15).mean()
+    df.dropna(inplace=True)
+    df.reset_index(inplace=True, drop=True)
+
     currency_pair = instrument.split('_')
-    if account.currency == currency_pair[0]:
-        balance = float(account.balance) * prices[0]
-        my_currency = currency_pair[0]
+    instructions = [1]
+    prices = [df.loc[0, 'ask']]
+    for i in range(1, len(df)):
+        if df.loc[i, 'mid+3'] > df.loc[i, 'mid+15'] and df.loc[i - 1, 'mid+3'] < df.loc[i - 1, 'mid+15']:
+            prices.append(df.loc[i, 'bid'])
+            instructions.append(0)
+        elif df.loc[i, 'mid+3'] < df.loc[i, 'mid+15'] and df.loc[i - 1, 'mid+3'] > df.loc[i - 1, 'mid+15']:
+            prices.append(df.loc[i, 'ask'])
+            instructions.append(1)
+
+    instructions.append(int(not instructions[-1]))
+    if instructions[-1]:
+        prices.append(ask_prices[-1])
     else:
-        balance = float(account.balance)
-        my_currency = currency_pair[1]
+        prices.append(bid_prices[-1])
+
+    if account.currency == currency_pair[0]:
+        prices = [1 / p for p in prices]
+
+    balance = float(account.balance)
     bt = BackTester(balance, instructions, prices, margin=0.01)
     run_irl = bt.run()
-    result = bt.result - bt.balance
-    if account.currency == currency_pair[0]:
-        result = result / bid_prices[-1]
-    print(f'Result of backtest: {my_currency} {(bt.result - bt.balance)}')
+    print(f'Result of backtest: {currency_pair[0]} {(bt.result - bt.balance)}')
     print(f'Price at start: {currency_pair[1]} {ask_prices[0]} Price at end: {currency_pair[1]} {bid_prices[-1]}')
-    exit()
+    print(len(instructions))
+
     if run_irl and check_time():
-        strat = FollowMarketStrategy(account=account, instrument=instrument, granularity=granularity,
-                                     close_date=close_date)
+        strat = CrossOverStrategy(account=account, instrument=instrument, granularity=granularity,
+                                  close_date=close_date)
         strat.run()
 
     final_balance = float(account.balance)
-    print(f'Result of real trading: {my_currency} {(final_balance - balance)}')
+    print(f'Result of real trading: {currency_pair[0]} {(final_balance - balance)}')

@@ -1,5 +1,6 @@
 import datetime as dt
 import time
+import pandas as pd
 from abc import ABC, abstractmethod
 
 from api_models.models import Account
@@ -55,6 +56,40 @@ class FollowMarketStrategy(BaseStrategy):
         self.account.create_order(new_order)
         while not dt.datetime.today() >= self.close_date:
             time.sleep(1)
+        open_positions = self.account.get_open_positions()
+        for op in open_positions:
+            self.account.close_position(op.get('instrument', ''))
+
+
+class CrossOverStrategy(BaseStrategy):
+
+    def run(self):
+        balance_at_start = float(self.account.balance)
+        new_order = {'order': {'type': 'MARKET',
+                               'units': '',
+                               'timeInForce': 'FOK',
+                               'instrument': self.instrument,
+                               'positionFill': 'DEFAULT'}}
+        previous_time = dt.datetime.now()
+        while not dt.datetime.today() >= self.close_date:
+            if dt.datetime.now() > previous_time + self.deltas[self.granularity]:
+                mid_candles = self.account.get_candles(self.instrument, granularity=self.granularity, count=30,
+                                                       price='M')
+                mid_prices = vals_from_candles(mid_candles)
+                df = pd.DataFrame({'mid': mid_prices})
+                mid3 = df['mid'].rolling(3).mean().tolist()
+                mid15 = df['mid'].rolling(15).mean().tolist()
+                if mid3[-1] > mid15[-1] and mid3[-2] < mid15[-2]:
+                    print('Sell now!')
+                    new_order['order']['units'] = f'{int(-(self.margin * balance_at_start))}'
+                    self.account.create_order(new_order)
+                elif mid3[-1] < mid15[-1] and mid3[-2] > mid15[-2]:
+                    print('Buy now!')
+                    new_order['order']['units'] = f'{int((self.margin * balance_at_start))}'
+                    self.account.create_order(new_order)
+                else:
+                    print('Do nothing yet!')
+                previous_time = dt.datetime.now()
         open_positions = self.account.get_open_positions()
         for op in open_positions:
             self.account.close_position(op.get('instrument', ''))
