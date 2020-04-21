@@ -61,7 +61,7 @@ if __name__ == '__main__':
     result = bt.result - bt.balance
     if account.currency == currency_pair[0]:
         result = result / bid_prices[-1]
-    print(f'Result of backtest: {my_currency} {(bt.result - bt.balance)}')
+    print(f'Result of backtest: {my_currency} {result}')
     print(f'Price at start: {currency_pair[1]} {ask_prices[0]} Price at end: {currency_pair[1]} {bid_prices[-1]}')
     exit()
     if run_irl and check_time():
