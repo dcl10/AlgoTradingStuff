@@ -56,9 +56,9 @@ class FollowMarketStrategy(BaseStrategy):
         self.account.create_order(new_order)
         while not dt.datetime.today() >= self.close_date:
             time.sleep(1)
-        open_positions = self.account.get_open_positions()
-        for op in open_positions:
-            self.account.close_position(op.get('instrument', ''))
+        open_trades = self.account.get_open_trades()
+        for op in open_trades:
+            self.account.close_trade(op.get('id', ''))
 
 
 class CrossOverStrategy(BaseStrategy):
@@ -90,6 +90,6 @@ class CrossOverStrategy(BaseStrategy):
                 else:
                     print('Do nothing yet!')
                 previous_time = dt.datetime.now()
-        open_positions = self.account.get_open_positions()
-        for op in open_positions:
-            self.account.close_position(op.get('instrument', ''))
+        open_trades = self.account.get_open_trades()
+        for op in open_trades:
+            self.account.close_trade(op.get('id', ''))

@@ -87,7 +87,7 @@ class TestAccount(unittest.TestCase):
                                   json=new_order,
                                   headers={'Authorization': f'Bearer {self.api_key}'})
         order_req.close()
-        self.assertIsInstance(self.account.close_position('GBP_USD'), dict)
+        self.assertIsInstance(self.account.close_position('GBP_USD', True), dict)
 
     def test_get_open_trades(self):
         self.assertEqual(self.account.get_open_trades(), [])
@@ -178,12 +178,21 @@ class TestIntegration(unittest.TestCase):
         self.assertEqual({}, bad_order_response)
 
     def test_close_trade(self):
-        valid_new_order = {'order': {'type': 'MARKET',
-                                     'units': '1',
-                                     'timeInForce': 'FOK',
-                                     'instrument': 'GBP_USD',
-                                     'positionFill': 'DEFAULT'}}
-        order_response = self.account.create_order(valid_new_order)
+        positive_new_order = {'order': {'type': 'MARKET',
+                                        'units': '1',
+                                        'timeInForce': 'FOK',
+                                        'instrument': 'GBP_USD',
+                                        'positionFill': 'DEFAULT'}}
+        order_response = self.account.create_order(positive_new_order)
+        trades = self.account.get_open_trades()
+        c_trade_req = self.account.close_trade(trades[0].get('id', '0000'))
+        self.assertIn('tradeClose', c_trade_req)
+        negative_new_order = {'order': {'type': 'MARKET',
+                                        'units': '1',
+                                        'timeInForce': 'FOK',
+                                        'instrument': 'GBP_USD',
+                                        'positionFill': 'DEFAULT'}}
+        order_response = self.account.create_order(negative_new_order)
         trades = self.account.get_open_trades()
         c_trade_req = self.account.close_trade(trades[0].get('id', '0000'))
         self.assertIn('tradeClose', c_trade_req)
@@ -211,6 +220,28 @@ class TestIntegration(unittest.TestCase):
                                           'Content-Type': 'application/json'},
                                  data=json.dumps({'longUnits': "ALL"}))
         close_req.close()
+
+    def test_close_position(self):
+        positive_new_order = {'order': {'type': 'MARKET',
+                                        'units': '1',
+                                        'timeInForce': 'FOK',
+                                        'instrument': 'GBP_USD',
+                                        'positionFill': 'DEFAULT'}}
+        order_req = requests.post(f'{self.base_url}/accounts/{self.account_id}/orders',
+                                  json=positive_new_order,
+                                  headers={'Authorization': f'Bearer {self.api_key}'})
+        order_req.close()
+        positions = self.account.get_open_positions()
+        for pos in positions:
+            if pos['long']['units'] != '0':
+                close_out = self.account.close_position('GBP_USD', True)
+                self.assertIn('longOrderFillTransaction', close_out)
+                self.assertNotIn('shortOrderFillTransaction', close_out)
+            elif pos['short']['units'] != '0':
+                close_out = self.account.close_position('GBP_USD', False)
+                self.assertIn('shortOrderFillTransaction', close_out)
+                self.assertNotIn('longOrderFillTransaction', close_out)
+
 
 
 if __name__ == '__main__':

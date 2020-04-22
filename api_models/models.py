@@ -79,16 +79,21 @@ class Account:
         else:
             raise AccountError(f'Could not find any open positions for {self.account_id}. Reason {reason}')
 
-    def close_position(self, instrument: str):
+    def close_position(self, instrument: str, long: bool):
         """
         This method closes the position for the provided instrument
         :param instrument:
+        :param long:
         :return:
         """
+        if long:
+            units_to_close = {'longUnits': "ALL"}
+        else:
+            units_to_close = {'shortUnits': "ALL"}
         response = requests.put(f'{self.base_url}/accounts/{self.account_id}/positions/{instrument}/close',
                                 headers={'Authorization': f'Bearer {self.api_key}',
                                          'Content-Type': 'application/json'},
-                                data=json.dumps({'longUnits': "ALL"}))
+                                data=json.dumps(units_to_close))
         result = response.json()
         response.close()
         new_details = get_account(self.account_id, self.api_key, base_url=self.base_url)
