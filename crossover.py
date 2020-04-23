@@ -67,12 +67,7 @@ if __name__ == '__main__':
     currency_pair = instrument.split('_')
     instructions = []
     prices = []
-    if account.currency == currency_pair[0]:
-        balance = float(account.balance) * prices[0]
-        my_currency = currency_pair[0]
-    else:
-        balance = float(account.balance)
-        my_currency = currency_pair[1]
+
     for i in range(1, len(df)):
         if df.loc[i, 'mid+3'] > df.loc[i, 'mid+15'] and df.loc[i - 1, 'mid+3'] < df.loc[i - 1, 'mid+15']:
             prices.append(df.loc[i, 'bid'])
@@ -80,6 +75,13 @@ if __name__ == '__main__':
         elif df.loc[i, 'mid+3'] < df.loc[i, 'mid+15'] and df.loc[i - 1, 'mid+3'] > df.loc[i - 1, 'mid+15']:
             prices.append(df.loc[i, 'ask'])
             instructions.append(1)
+
+    if account.currency == currency_pair[0]:
+        balance = float(account.balance) * prices[0]
+        my_currency = currency_pair[0]
+    else:
+        balance = float(account.balance)
+        my_currency = currency_pair[1]
 
     instructions.append(int(not instructions[-1]))
     if instructions[-1]:
@@ -89,9 +91,11 @@ if __name__ == '__main__':
 
     bt = BackTester(balance, instructions, prices, margin=margin)
     run_irl = bt.run()
-    print(f'Result of backtest: {my_currency} {(bt.result - bt.balance)}')
+    result = bt.result - bt.balance
+    if account.currency == currency_pair[0]:
+        result = result / bid_prices[-1]
+    print(f'Result of backtest: {my_currency} {result}')
     print(f'Price at start: {currency_pair[1]} {ask_prices[0]} Price at end: {currency_pair[1]} {bid_prices[-1]}')
-    print(len(instructions))
 
     if run_irl and check_time():
         strat = CrossOverStrategy(account=account, instrument=instrument, granularity=granularity,
