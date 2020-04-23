@@ -18,6 +18,8 @@ a_parser.add_argument('-c', '--close', dest='close', help='the close date for th
                       default=(dt.datetime.today() + dt.timedelta(minutes=10)).strftime('%Y-%m-%d %H:%M:%S'))
 a_parser.add_argument('-i', '--instrument', dest='instrument', help='the instrument to back test', default='GBP_USD')
 a_parser.add_argument('-g', '--granularity', dest='granularity', help='the spacing between the candles', default='M1')
+a_parser.add_argument('-m', '--margin', dest='margin', help='the fraction of your balance to risk on each trade',
+                      default=0.01)
 
 
 if __name__ == '__main__':
@@ -29,6 +31,7 @@ if __name__ == '__main__':
     close_date = args.close
     instrument = args.instrument
     granularity = args.granularity
+    margin = args.margin
 
     c_parser = configparser.ConfigParser()
     c_parser.read(oanda_config)
@@ -62,8 +65,14 @@ if __name__ == '__main__':
     df.reset_index(inplace=True, drop=True)
 
     currency_pair = instrument.split('_')
-    instructions = [1]
-    prices = [df.loc[0, 'ask']]
+    instructions = []
+    prices = []
+    if account.currency == currency_pair[0]:
+        balance = float(account.balance) * prices[0]
+        my_currency = currency_pair[0]
+    else:
+        balance = float(account.balance)
+        my_currency = currency_pair[1]
     for i in range(1, len(df)):
         if df.loc[i, 'mid+3'] > df.loc[i, 'mid+15'] and df.loc[i - 1, 'mid+3'] < df.loc[i - 1, 'mid+15']:
             prices.append(df.loc[i, 'bid'])
@@ -78,20 +87,16 @@ if __name__ == '__main__':
     else:
         prices.append(bid_prices[-1])
 
-    if account.currency == currency_pair[0]:
-        prices = [1 / p for p in prices]
-
-    balance = float(account.balance)
-    bt = BackTester(balance, instructions, prices, margin=0.01)
+    bt = BackTester(balance, instructions, prices, margin=margin)
     run_irl = bt.run()
-    print(f'Result of backtest: {currency_pair[0]} {(bt.result - bt.balance)}')
+    print(f'Result of backtest: {my_currency} {(bt.result - bt.balance)}')
     print(f'Price at start: {currency_pair[1]} {ask_prices[0]} Price at end: {currency_pair[1]} {bid_prices[-1]}')
     print(len(instructions))
 
     if run_irl and check_time():
         strat = CrossOverStrategy(account=account, instrument=instrument, granularity=granularity,
-                                  close_date=close_date)
+                                  close_date=close_date, margin=margin)
         strat.run()
 
     final_balance = float(account.balance)
-    print(f'Result of real trading: {currency_pair[0]} {(final_balance - balance)}')
+    print(f'Result of real trading: {my_currency} {(final_balance - balance)}')

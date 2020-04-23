@@ -17,7 +17,8 @@ a_parser.add_argument('-c', '--close', dest='close', help='the close date for th
                       default=(dt.datetime.today() + dt.timedelta(minutes=10)).strftime('%Y-%m-%d %H:%M:%S'))
 a_parser.add_argument('-i', '--instrument', dest='instrument', help='the instrument to back test', default='GBP_USD')
 a_parser.add_argument('-g', '--granularity', dest='granularity', help='the spacing between the candles', default='M1')
-
+a_parser.add_argument('-m', '--margin', dest='margin', help='the fraction of your balance to risk on each trade',
+                      default=0.01)
 
 if __name__ == '__main__':
     args = a_parser.parse_args(sys.argv[1:])
@@ -28,6 +29,7 @@ if __name__ == '__main__':
     close_date = args.close
     instrument = args.instrument
     granularity = args.granularity
+    margin = args.margin
 
     c_parser = configparser.ConfigParser()
     c_parser.read(oanda_config)
@@ -56,7 +58,7 @@ if __name__ == '__main__':
     else:
         balance = float(account.balance)
         my_currency = currency_pair[1]
-    bt = BackTester(balance, instructions, prices, margin=0.01)
+    bt = BackTester(balance, instructions, prices, margin=margin)
     run_irl = bt.run()
     result = bt.result - bt.balance
     if account.currency == currency_pair[0]:
@@ -66,7 +68,7 @@ if __name__ == '__main__':
 
     if run_irl and check_time():
         strat = FollowMarketStrategy(account=account, instrument=instrument, granularity=granularity,
-                                     close_date=close_date)
+                                     close_date=close_date, margin=margin)
         strat.run()
 
     final_balance = float(account.balance)
