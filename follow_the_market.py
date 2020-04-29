@@ -71,5 +71,9 @@ if __name__ == '__main__':
                                      close_date=close_date, margin=margin)
         strat.run()
 
-    final_balance = float(account.balance)
-    print(f'Result of real trading: {my_currency} {(final_balance - balance)}')
+    if account.currency == currency_pair[0]:
+        final_balance = float(account.balance) * prices[0]
+    else:
+        final_balance = float(account.balance)
+
+    print(f'Result of real trading: {my_currency} {final_balance - balance}')
