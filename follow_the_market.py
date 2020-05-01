@@ -53,16 +53,14 @@ if __name__ == '__main__':
     prices = [ask_prices[0], bid_prices[-1]]
     currency_pair = instrument.split('_')
     if account.currency == currency_pair[0]:
-        balance = float(account.balance) * prices[0]
         my_currency = currency_pair[0]
     else:
-        balance = float(account.balance)
         my_currency = currency_pair[1]
+    balance = float(account.balance)
     bt = BackTester(balance, instructions, prices, margin=margin)
     run_irl = bt.run()
     result = bt.result - bt.balance
-    if account.currency == currency_pair[0]:
-        result = result / bid_prices[-1]
+
     print(f'Result of backtest: {my_currency} {result}')
     print(f'Price at start: {currency_pair[1]} {ask_prices[0]} Price at end: {currency_pair[1]} {bid_prices[-1]}')
 
@@ -71,9 +69,6 @@ if __name__ == '__main__':
                                      close_date=close_date, margin=margin)
         strat.run()
 
-    if account.currency == currency_pair[0]:
-        final_balance = float(account.balance) * prices[0]
-    else:
-        final_balance = float(account.balance)
+    final_balance = float(account.balance)
 
     print(f'Result of real trading: {my_currency} {final_balance - balance}')
