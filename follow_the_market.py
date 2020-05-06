@@ -29,7 +29,7 @@ if __name__ == '__main__':
     close_date = args.close
     instrument = args.instrument
     granularity = args.granularity
-    margin = args.margin
+    margin = float(args.margin)
 
     c_parser = configparser.ConfigParser()
     c_parser.read(oanda_config)
