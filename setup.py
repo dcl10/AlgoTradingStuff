@@ -8,7 +8,7 @@ setup(
     description="A small example package",
     long_description_content_type="text/markdown",
     url="https://github.com/dcl10/AlgoTradingStuff",
-    packages=find_packages(),
+    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     install_requires=['requests'],
     test_suite='tests',
     tests_require=['pytest'],
