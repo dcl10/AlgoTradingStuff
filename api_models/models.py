@@ -10,7 +10,7 @@ class Account:
     This class hold information about an OANDA account
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, api_key, base_url, **kwargs):
         """
 
         :param api_key:
@@ -18,9 +18,8 @@ class Account:
         :param account_id:
         :param kwargs:
         """
-        # self.api_key = api_key
-        # self.base_url = base_url
-        # self.account_id = account_id
+        self.api_key = api_key
+        self.base_url = base_url
         self.__dict__.update(kwargs)
 
     # def __repr__(self):
@@ -33,9 +32,14 @@ class Account:
         """
         This method creates an order of the specified type and amount of units
         :param data: a dict with the parameters of the order to be created
-        :return: either a dict with information about the new order, or and empty dict if the order failed
+        :returns: requests.PreparedRequest
         """
-        pass
+        req = requests.Request(url=f'{self.base_url}/accounts/{self.id}/orders',
+                               headers={'Authorization': f'Bearer {self.api_key}',
+                                        'Content-Type': 'application/json'},
+                               method='POST',
+                               json=data)
+        return req.prepare()
 
     def cancel_order(self, order_id: str):
         """
@@ -106,7 +110,7 @@ def get_accounts(api_key: str, base_url: str):
     accounts = response.json().get('accounts', [])
     response.close()
     if accounts:
-        return [Account(**account) for account in accounts]
+        return [Account(api_key, base_url, **account) for account in accounts]
     else:
         raise AccountError(f'no accounts found.' + os.linesep + f'Reason {reason}' + os.linesep +
                            f'Code {code}')
@@ -128,7 +132,7 @@ def get_account(account_id: str, api_key: str, base_url: str):
     account = response.json().get('account', {})
     response.close()
     if account != {}:
-        return Account(**account)
+        return Account(api_key, base_url, **account)
     else:
         raise AccountError(f'failed to get account with ID: {account_id}.' + os.linesep +
                            f'Reason {reason}' + os.linesep + f'Code {code}')
