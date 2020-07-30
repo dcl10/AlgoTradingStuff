@@ -54,11 +54,15 @@ class Account:
 
     def cancel_order(self, order_id: str):
         """
-        This method cancels the specified order
+        This method makes a request to cancel the specified order
         :param order_id: the identifier of the order to be cancelled
-        :return: a dict of the details of the cancellation, or a empty dict if the cancellation failed
+        :returns: requests.PreparedRequest
         """
-        pass
+        req = requests.Request(url=f'{self.base_url}/accounts/{self.id}/orders/{order_id}/cancel',
+                               headers={'Authorization': f'Bearer {self.api_key}',
+                                        'Content-Type': 'application/json'},
+                               method='PUT')
+        return req.prepare()
 
     def get_open_positions(self):
         """
