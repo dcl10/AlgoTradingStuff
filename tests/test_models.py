@@ -56,26 +56,18 @@ class TestAccount(unittest.TestCase):
         self.assertEqual(order_response.method, 'GET')
         self.assertIsNone(order_response.body)
 
-    # def test_cancel_order(self):
-    #     data = {'order': {"price": '1.2',
-    #                       "timeInForce": "GTC",
-    #                       "instrument": "GBP_USD",
-    #                       "units": "1",
-    #                       "clientExtensions": {
-    #                           "comment": "New idea for trading",
-    #                           "tag": "strategy_9",
-    #                           "id": "my_order_100"
-    #                       },
-    #                       "type": "MARKET_IF_TOUCHED",
-    #                       "positionFill": "DEFAULT"}}
-    #     orders_req = requests.post(f'{self.base_url}/accounts/{self.account_id}/orders',
-    #                                json=data,
-    #                                headers={'Authorization': f'Bearer {self.api_key}'})
-    #     order_id = orders_req.json().get('orderCreateTransaction').get('id')
-    #     orders_req.close()
-    #     result = self.primary_account.cancel_order(order_id)
-    #     self.assertIsInstance(result, dict)
-    #
+    def test_cancel_order(self):
+        order_id = '6543'
+        cancel_order_response = self.primary_account.cancel_order(order_id)
+        self.assertIsInstance(cancel_order_response, requests.PreparedRequest)
+        self.assertIn('Authorization', cancel_order_response.headers)
+        self.assertIn('Content-Type', cancel_order_response.headers)
+        self.assertEqual(cancel_order_response.headers['Authorization'], f'Bearer {self.api_key}')
+        self.assertEqual(cancel_order_response.url,
+                         f'{self.base_url}/accounts/{self.account_id}/orders/{order_id}/cancel')
+        self.assertEqual(cancel_order_response.method, 'PUT')
+        self.assertIsNone(cancel_order_response.body)
+
     def test_get_open_positions(self):
         positions_response = self.primary_account.get_open_positions()
         self.assertIsInstance(positions_response, requests.PreparedRequest)
