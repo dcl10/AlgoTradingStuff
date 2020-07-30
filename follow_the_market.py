@@ -2,7 +2,7 @@ import sys
 import configparser
 import argparse
 import datetime as dt
-from api_models.models import get_account, Account
+from algotradingstuff.api_models import get_account, Account
 from backtest.backtest import BackTester
 from strategies.strategies import FollowMarketStrategy, vals_from_candles, check_time
 
