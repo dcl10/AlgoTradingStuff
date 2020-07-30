@@ -62,10 +62,14 @@ class Account:
 
     def get_open_positions(self):
         """
-        This method gets all the open positions for the account
-        :return: a list of open positions, or an empty list if no positions
+        This method makes a request to get all the open positions for the account
+        :returns: requests.PreparedRequest
         """
-        pass
+        req = requests.Request(url=f'{self.base_url}/accounts/{self.id}/openPositions',
+                               headers={'Authorization': f'Bearer {self.api_key}',
+                                        'Content-Type': 'application/json'},
+                               method='GET')
+        return req.prepare()
 
     def close_position(self, instrument: str, long: bool):
         """

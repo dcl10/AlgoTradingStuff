@@ -76,26 +76,16 @@ class TestAccount(unittest.TestCase):
     #     result = self.primary_account.cancel_order(order_id)
     #     self.assertIsInstance(result, dict)
     #
-    # def test_get_open_positions(self):
-    #     self.assertEqual(self.primary_account.get_open_positions(), [])
-    #     new_order = {'order': {'type': 'MARKET',
-    #                            'units': '1',
-    #                            'timeInForce': 'FOK',
-    #                            'instrument': 'GBP_USD',
-    #                            'positionFill': 'DEFAULT'}}
-    #     order_req = requests.post(f'{self.base_url}/accounts/{self.account_id}/orders',
-    #                               json=new_order,
-    #                               headers={'Authorization': f'Bearer {self.api_key}'})
-    #     order_req.close()
-    #     positions = self.primary_account.get_open_positions()
-    #     self.assertIsInstance(positions, list)
-    #     self.assertIsInstance(positions[0], dict)
-    #     close_req = requests.put(f'{self.base_url}/accounts/{self.account_id}/positions/{positions[0].get("instrument")}/close',
-    #                              headers={'Authorization': f'Bearer {self.api_key}',
-    #                                       'Content-Type': 'application/json'},
-    #                              data=json.dumps({'longUnits': "ALL"}))
-    #     close_req.close()
-    #
+    def test_get_open_positions(self):
+        positions_response = self.primary_account.get_open_positions()
+        self.assertIsInstance(positions_response, requests.PreparedRequest)
+        self.assertIn('Authorization', positions_response.headers)
+        self.assertIn('Content-Type', positions_response.headers)
+        self.assertEqual(positions_response.headers['Authorization'], f'Bearer {self.api_key}')
+        self.assertEqual(positions_response.url, f'{self.base_url}/accounts/{self.account_id}/openPositions')
+        self.assertEqual(positions_response.method, 'GET')
+        self.assertIsNone(positions_response.body)
+
     # def test_close_position(self):
     #     new_order = {'order': {'type': 'MARKET',
     #                            'units': '1',
