@@ -30,7 +30,7 @@ class Account:
 
     def create_order(self, data: dict):
         """
-        This method creates an order of the specified type and amount of units
+        This method creates a request for an order of the specified type and amount of units
         :param data: a dict with the parameters of the order to be created
         :returns: requests.PreparedRequest
         """
@@ -39,6 +39,17 @@ class Account:
                                         'Content-Type': 'application/json'},
                                method='POST',
                                json=data)
+        return req.prepare()
+
+    def get_orders(self):
+        """
+        This method creates a request to get all orders for the account
+        :returns: requests.PreparedRequest
+        """
+        req = requests.Request(url=f'{self.base_url}/accounts/{self.id}/orders',
+                               headers={'Authorization': f'Bearer {self.api_key}',
+                                        'Content-Type': 'application/json'},
+                               method='GET')
         return req.prepare()
 
     def cancel_order(self, order_id: str):
