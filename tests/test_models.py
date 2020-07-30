@@ -27,78 +27,79 @@ class TestAccount(unittest.TestCase):
                                'timeInForce': 'FOK',
                                'instrument': 'GBP_USD',
                                'positionFill': 'DEFAULT'}}
-        order_response = self.primary_account.create_order(new_order)
-        self.assertIsInstance(order_response, requests.PreparedRequest)
-        self.assertIn('Authorization', order_response.headers)
-        self.assertIn('Content-Type', order_response.headers)
-        self.assertEqual(order_response.headers['Authorization'], f'Bearer {self.api_key}')
-        self.assertEqual(order_response.url, f'{self.base_url}/accounts/{self.account_id}/orders')
-        self.assertEqual(order_response.method, 'POST')
-        self.assertIn(b'order', order_response.body)
-        self.assertIn(b'units', order_response.body)
-        self.assertIn(b'100', order_response.body)
-        self.assertIn(b'timeInForce', order_response.body)
-        self.assertIn(b'FOK', order_response.body)
-        self.assertIn(b'instrument', order_response.body)
-        self.assertIn(b'GBP_USD', order_response.body)
-        self.assertIn(b'positionFill', order_response.body)
-        self.assertIn(b'DEFAULT', order_response.body)
-        self.assertIn(b'type', order_response.body)
-        self.assertIn(b'MARKET', order_response.body)
+        order_request = self.primary_account.create_order(new_order)
+        self.assertIsInstance(order_request, requests.PreparedRequest)
+        self.assertIn('Authorization', order_request.headers)
+        self.assertIn('Content-Type', order_request.headers)
+        self.assertEqual(order_request.headers['Authorization'], f'Bearer {self.api_key}')
+        self.assertEqual(order_request.url, f'{self.base_url}/accounts/{self.account_id}/orders')
+        self.assertEqual(order_request.method, 'POST')
+        self.assertIn(b'order', order_request.body)
+        self.assertIn(b'units', order_request.body)
+        self.assertIn(b'100', order_request.body)
+        self.assertIn(b'timeInForce', order_request.body)
+        self.assertIn(b'FOK', order_request.body)
+        self.assertIn(b'instrument', order_request.body)
+        self.assertIn(b'GBP_USD', order_request.body)
+        self.assertIn(b'positionFill', order_request.body)
+        self.assertIn(b'DEFAULT', order_request.body)
+        self.assertIn(b'type', order_request.body)
+        self.assertIn(b'MARKET', order_request.body)
 
     def test_get_orders(self):
-        order_response = self.primary_account.get_orders()
-        self.assertIsInstance(order_response, requests.PreparedRequest)
-        self.assertIn('Authorization', order_response.headers)
-        self.assertIn('Content-Type', order_response.headers)
-        self.assertEqual(order_response.headers['Authorization'], f'Bearer {self.api_key}')
-        self.assertEqual(order_response.url, f'{self.base_url}/accounts/{self.account_id}/orders')
-        self.assertEqual(order_response.method, 'GET')
-        self.assertIsNone(order_response.body)
+        order_request = self.primary_account.get_orders()
+        self.assertIsInstance(order_request, requests.PreparedRequest)
+        self.assertIn('Authorization', order_request.headers)
+        self.assertIn('Content-Type', order_request.headers)
+        self.assertEqual(order_request.headers['Authorization'], f'Bearer {self.api_key}')
+        self.assertEqual(order_request.url, f'{self.base_url}/accounts/{self.account_id}/orders')
+        self.assertEqual(order_request.method, 'GET')
+        self.assertIsNone(order_request.body)
 
     def test_cancel_order(self):
         order_id = '6543'
-        cancel_order_response = self.primary_account.cancel_order(order_id)
-        self.assertIsInstance(cancel_order_response, requests.PreparedRequest)
-        self.assertIn('Authorization', cancel_order_response.headers)
-        self.assertIn('Content-Type', cancel_order_response.headers)
-        self.assertEqual(cancel_order_response.headers['Authorization'], f'Bearer {self.api_key}')
-        self.assertEqual(cancel_order_response.url,
+        cancel_order_requests = self.primary_account.cancel_order(order_id)
+        self.assertIsInstance(cancel_order_requests, requests.PreparedRequest)
+        self.assertIn('Authorization', cancel_order_requests.headers)
+        self.assertIn('Content-Type', cancel_order_requests.headers)
+        self.assertEqual(cancel_order_requests.headers['Authorization'], f'Bearer {self.api_key}')
+        self.assertEqual(cancel_order_requests.url,
                          f'{self.base_url}/accounts/{self.account_id}/orders/{order_id}/cancel')
-        self.assertEqual(cancel_order_response.method, 'PUT')
-        self.assertIsNone(cancel_order_response.body)
+        self.assertEqual(cancel_order_requests.method, 'PUT')
+        self.assertIsNone(cancel_order_requests.body)
 
     def test_get_open_positions(self):
-        positions_response = self.primary_account.get_open_positions()
-        self.assertIsInstance(positions_response, requests.PreparedRequest)
-        self.assertIn('Authorization', positions_response.headers)
-        self.assertIn('Content-Type', positions_response.headers)
-        self.assertEqual(positions_response.headers['Authorization'], f'Bearer {self.api_key}')
-        self.assertEqual(positions_response.url, f'{self.base_url}/accounts/{self.account_id}/openPositions')
-        self.assertEqual(positions_response.method, 'GET')
-        self.assertIsNone(positions_response.body)
+        positions_requests = self.primary_account.get_open_positions()
+        self.assertIsInstance(positions_requests, requests.PreparedRequest)
+        self.assertIn('Authorization', positions_requests.headers)
+        self.assertIn('Content-Type', positions_requests.headers)
+        self.assertEqual(positions_requests.headers['Authorization'], f'Bearer {self.api_key}')
+        self.assertEqual(positions_requests.url, f'{self.base_url}/accounts/{self.account_id}/openPositions')
+        self.assertEqual(positions_requests.method, 'GET')
+        self.assertIsNone(positions_requests.body)
 
-    # def test_close_position(self):
-    #     new_order = {'order': {'type': 'MARKET',
-    #                            'units': '1',
-    #                            'timeInForce': 'FOK',
-    #                            'instrument': 'GBP_USD',
-    #                            'positionFill': 'DEFAULT'}}
-    #     order_req = requests.post(f'{self.base_url}/accounts/{self.account_id}/orders',
-    #                               json=new_order,
-    #                               headers={'Authorization': f'Bearer {self.api_key}'})
-    #     order_req.close()
-    #     self.assertIsInstance(self.primary_account.close_position('GBP_USD', True), dict)
-    #
+    def test_close_position(self):
+        instrument = 'GBP_USD'
+        close_trade_request = self.primary_account.close_position(instrument, long=True)
+        self.assertIsInstance(close_trade_request, requests.PreparedRequest)
+        self.assertIn('Authorization', close_trade_request.headers)
+        self.assertIn('Content-Type', close_trade_request.headers)
+        self.assertEqual(close_trade_request.headers['Authorization'], f'Bearer {self.api_key}')
+        self.assertEqual(close_trade_request.url,
+                         f'{self.base_url}/accounts/{self.account_id}/positions/{instrument}/close')
+        self.assertEqual(close_trade_request.method, 'PUT')
+        self.assertIn(b'longUnits', close_trade_request.body)
+        self.assertIn(b'ALL', close_trade_request.body)
+
     def test_get_open_trades(self):
-        trades_response = self.primary_account.get_open_trades()
-        self.assertIsInstance(trades_response, requests.PreparedRequest)
-        self.assertIn('Authorization', trades_response.headers)
-        self.assertIn('Content-Type', trades_response.headers)
-        self.assertEqual(trades_response.headers['Authorization'], f'Bearer {self.api_key}')
-        self.assertEqual(trades_response.url, f'{self.base_url}/accounts/{self.account_id}/openTrades')
-        self.assertEqual(trades_response.method, 'GET')
-        self.assertIsNone(trades_response.body)
+        trades_request = self.primary_account.get_open_trades()
+        self.assertIsInstance(trades_request, requests.PreparedRequest)
+        self.assertIn('Authorization', trades_request.headers)
+        self.assertIn('Content-Type', trades_request.headers)
+        self.assertEqual(trades_request.headers['Authorization'], f'Bearer {self.api_key}')
+        self.assertEqual(trades_request.url, f'{self.base_url}/accounts/{self.account_id}/openTrades')
+        self.assertEqual(trades_request.method, 'GET')
+        self.assertIsNone(trades_request.body)
 
     # def test_close_trade(self):
     #     c_trade_req = self.primary_account.close_trade('0000')
