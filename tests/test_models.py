@@ -113,13 +113,25 @@ class TestAccount(unittest.TestCase):
         self.assertEqual(close_trade_request.method, 'PUT')
         self.assertIsNone(close_trade_request.body)
 
-    # def test_get_candles(self):
-    #     candles = self.primary_account.get_candles('GBP_USD',
-    #                                        start=(dt.datetime.today() - dt.timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S'),
-    #                                        end=dt.datetime.today().strftime('%Y-%m-%d %H:%M:%S'))
-    #     self.assertIsInstance(candles, list)
-    #     one_candle = self.primary_account.get_candles('GBP_USD', count=1)
-    #     self.assertEqual(len(one_candle), 1)
+    def test_get_candles(self):
+        start = (dt.datetime.today() - dt.timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S')
+        start_ts = str(dt.datetime.strptime(start, '%Y-%m-%d %H:%M:%S').timestamp())
+        end = dt.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        end_ts = str(dt.datetime.strptime(end, '%Y-%m-%d %H:%M:%S').timestamp())
+        instrument = 'GBP_USD'
+        count = 1
+        candles_request = self.primary_account.get_candles(instrument,
+                                                           start=start,
+                                                           end=end)
+        self.assertIsInstance(candles_request, requests.PreparedRequest)
+        self.assertIn(start_ts, candles_request.url)
+        self.assertIn(end_ts, candles_request.url)
+        self.assertIn(instrument, candles_request.url)
+        one_candle_request = self.primary_account.get_candles(instrument, count=count)
+        self.assertIsInstance(one_candle_request, requests.PreparedRequest)
+        self.assertIn(instrument, one_candle_request.url)
+        self.assertNotIn('from', one_candle_request.url)
+        self.assertNotIn('to', one_candle_request.url)
 
 
 class TestStaticMethods(unittest.TestCase):
