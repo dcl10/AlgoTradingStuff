@@ -21,13 +21,6 @@ class TestAccount(unittest.TestCase):
         response.close()
         self.primary_account = Account(self.api_key, self.base_url, **acc)
 
-    def tearDown(self) -> None:
-        close_req = requests.put(f'{self.base_url}/accounts/{self.account_id}/positions/GBP_USD/close',
-                                 headers={'Authorization': f'Bearer {self.api_key}',
-                                          'Content-Type': 'application/json'},
-                                 data=json.dumps({'longUnits': "ALL"}))
-        close_req.close()
-
     def test_create_order(self):
         new_order = {'order': {'type': 'MARKET',
                                'units': '100',
@@ -41,6 +34,27 @@ class TestAccount(unittest.TestCase):
         self.assertEqual(order_response.headers['Authorization'], f'Bearer {self.api_key}')
         self.assertEqual(order_response.url, f'{self.base_url}/accounts/{self.account_id}/orders')
         self.assertEqual(order_response.method, 'POST')
+        self.assertIn(b'order', order_response.body)
+        self.assertIn(b'units', order_response.body)
+        self.assertIn(b'100', order_response.body)
+        self.assertIn(b'timeInForce', order_response.body)
+        self.assertIn(b'FOK', order_response.body)
+        self.assertIn(b'instrument', order_response.body)
+        self.assertIn(b'GBP_USD', order_response.body)
+        self.assertIn(b'positionFill', order_response.body)
+        self.assertIn(b'DEFAULT', order_response.body)
+        self.assertIn(b'type', order_response.body)
+        self.assertIn(b'MARKET', order_response.body)
+
+    def test_get_orders(self):
+        order_response = self.primary_account.get_orders()
+        self.assertIsInstance(order_response, requests.PreparedRequest)
+        self.assertIn('Authorization', order_response.headers)
+        self.assertIn('Content-Type', order_response.headers)
+        self.assertEqual(order_response.headers['Authorization'], f'Bearer {self.api_key}')
+        self.assertEqual(order_response.url, f'{self.base_url}/accounts/{self.account_id}/orders')
+        self.assertEqual(order_response.method, 'GET')
+        self.assertIsNone(order_response.body)
 
     # def test_cancel_order(self):
     #     data = {'order': {"price": '1.2',
