@@ -80,16 +80,16 @@ class TestAccount(unittest.TestCase):
 
     def test_close_position(self):
         instrument = 'GBP_USD'
-        close_trade_request = self.primary_account.close_position(instrument, long=True)
-        self.assertIsInstance(close_trade_request, requests.PreparedRequest)
-        self.assertIn('Authorization', close_trade_request.headers)
-        self.assertIn('Content-Type', close_trade_request.headers)
-        self.assertEqual(close_trade_request.headers['Authorization'], f'Bearer {self.api_key}')
-        self.assertEqual(close_trade_request.url,
+        close_position_request = self.primary_account.close_position(instrument, long=True)
+        self.assertIsInstance(close_position_request, requests.PreparedRequest)
+        self.assertIn('Authorization', close_position_request.headers)
+        self.assertIn('Content-Type', close_position_request.headers)
+        self.assertEqual(close_position_request.headers['Authorization'], f'Bearer {self.api_key}')
+        self.assertEqual(close_position_request.url,
                          f'{self.base_url}/accounts/{self.account_id}/positions/{instrument}/close')
-        self.assertEqual(close_trade_request.method, 'PUT')
-        self.assertIn(b'longUnits', close_trade_request.body)
-        self.assertIn(b'ALL', close_trade_request.body)
+        self.assertEqual(close_position_request.method, 'PUT')
+        self.assertIn(b'longUnits', close_position_request.body)
+        self.assertIn(b'ALL', close_position_request.body)
 
     def test_get_open_trades(self):
         trades_request = self.primary_account.get_open_trades()
@@ -101,10 +101,18 @@ class TestAccount(unittest.TestCase):
         self.assertEqual(trades_request.method, 'GET')
         self.assertIsNone(trades_request.body)
 
-    # def test_close_trade(self):
-    #     c_trade_req = self.primary_account.close_trade('0000')
-    #     self.assertIsInstance(c_trade_req, dict)
-    #
+    def test_close_trade(self):
+        trade_id = '1000'
+        close_trade_request = self.primary_account.close_trade(trade_id)
+        self.assertIsInstance(close_trade_request, requests.PreparedRequest)
+        self.assertIn('Authorization', close_trade_request.headers)
+        self.assertIn('Content-Type', close_trade_request.headers)
+        self.assertEqual(close_trade_request.headers['Authorization'], f'Bearer {self.api_key}')
+        self.assertEqual(close_trade_request.url,
+                         f'{self.base_url}/accounts/{self.account_id}/trades/{trade_id}/close')
+        self.assertEqual(close_trade_request.method, 'PUT')
+        self.assertIsNone(close_trade_request.body)
+
     # def test_get_candles(self):
     #     candles = self.primary_account.get_candles('GBP_USD',
     #                                        start=(dt.datetime.today() - dt.timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S'),
