@@ -22,11 +22,21 @@ class Account:
         self.base_url = base_url
         self.__dict__.update(kwargs)
 
-    # def __repr__(self):
-    #     return f'Account(api_key: <secret>, base_url: {self.base_url}, account_id: {self.account_id}'
-    #
-    # def __str__(self):
-    #     return self.account_id
+    def update_account_state(self, last_transaction_id: str):
+        response = requests.get(f'{self.base_url}/accounts/{self.id}/changes',
+                                headers={'Authorization': f'Bearer {self.api_key}',
+                                         'Content-Type': 'application/json'},
+                                params={'sinceTransactionID': last_transaction_id})
+        code = response.status_code
+        reason = response.reason
+        state = response.json().get('state', {})
+        response.close()
+        if state != {}:
+            self.__dict__.update(**state)
+            return True
+        else:
+            raise AccountError(f'failed to update state of account with ID: {self.id}.' + os.linesep +
+                               f'Reason {reason}' + os.linesep + f'Code {code}')
 
     def create_order(self, data: dict):
         """
@@ -189,7 +199,7 @@ def get_account(account_id: str, api_key: str, base_url: str):
     :raises: AccountError
     :returns: Account
     """
-    response = requests.get(f'{base_url}/accounts/{account_id}/summary',
+    response = requests.get(f'{base_url}/accounts/{account_id}',
                             headers={'Authorization': f'Bearer {api_key}'})
     code = response.status_code
     reason = response.reason

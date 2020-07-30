@@ -18,6 +18,7 @@ class TestAccount(unittest.TestCase):
         response = requests.get(f'{self.base_url}/accounts/{self.account_id}',
                                 headers={'Authorization': f'Bearer {self.api_key}'})
         acc = response.json().get('account', {})
+        self.last_transaction = response.json().get('lastTransactionID', '')
         response.close()
         self.primary_account = Account(self.api_key, self.base_url, **acc)
 
@@ -132,6 +133,10 @@ class TestAccount(unittest.TestCase):
         self.assertIn(instrument, one_candle_request.url)
         self.assertNotIn('from', one_candle_request.url)
         self.assertNotIn('to', one_candle_request.url)
+
+    def test_update_account_state(self):
+        self.assertTrue(self.primary_account.update_account_state(self.last_transaction))
+        self.assertRaises(AccountError, self.primary_account.update_account_state, '0000')
 
 
 class TestStaticMethods(unittest.TestCase):
