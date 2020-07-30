@@ -128,7 +128,35 @@ class Account:
         :param count: how many rows of data to return
         :return:
         """
-        pass
+        if start != '' and end != '':
+            start = dt.datetime.strptime(start, '%Y-%m-%d %H:%M:%S').timestamp()
+            end = dt.datetime.strptime(end, '%Y-%m-%d %H:%M:%S').timestamp()
+            req = requests.Request(url=f'{self.base_url}/accounts/{self.id}/instruments/{instrument}/candles',
+                                   headers={'Authorization': f'Bearer {self.api_key}',
+                                            'Accept-Datetime-Format': 'UNIX'},
+                                   params={'granularity': granularity, 'price': price,
+                                           'from': start, 'to': end})
+        elif start == '' and end != '':
+            end = dt.datetime.strptime(end, '%Y-%m-%d %H:%M:%S').timestamp()
+            req = requests.Request(url=f'{self.base_url}/accounts/{self.id}/instruments/{instrument}/candles',
+                                   headers={'Authorization': f'Bearer {self.api_key}',
+                                            'Accept-Datetime-Format': 'UNIX'},
+                                   params={'granularity': granularity, 'price': price,
+                                           'to': end, 'count': count})
+        elif end == '' and start != '':
+            start = dt.datetime.strptime(start, '%Y-%m-%d %H:%M:%S').timestamp()
+            req = requests.Request(url=f'{self.base_url}/accounts/{self.id}/instruments/{instrument}/candles',
+                                   headers={'Authorization': f'Bearer {self.api_key}',
+                                            'Accept-Datetime-Format': 'UNIX'},
+                                   params={'granularity': granularity, 'price': price,
+                                           'from': start, 'count': count})
+        else:
+            req = requests.Request(url=f'{self.base_url}/accounts/{self.id}/instruments/{instrument}/candles',
+                                   headers={'Authorization': f'Bearer {self.api_key}',
+                                            'Accept-Datetime-Format': 'UNIX'},
+                                   params={'granularity': granularity, 'price': price,
+                                           'count': count})
+        return req.prepare()
 
 
 def get_accounts(api_key: str, base_url: str):
