@@ -98,20 +98,16 @@ class TestAccount(unittest.TestCase):
     #     order_req.close()
     #     self.assertIsInstance(self.primary_account.close_position('GBP_USD', True), dict)
     #
-    # def test_get_open_trades(self):
-    #     self.assertEqual(self.primary_account.get_open_trades(), [])
-    #     new_order = {'order': {'type': 'MARKET',
-    #                            'units': '1',
-    #                            'timeInForce': 'FOK',
-    #                            'instrument': 'GBP_USD',
-    #                            'positionFill': 'DEFAULT'}}
-    #     order_req = requests.post(f'{self.base_url}/accounts/{self.account_id}/orders',
-    #                               json=new_order,
-    #                               headers={'Authorization': f'Bearer {self.api_key}'})
-    #     order_req.close()
-    #     trades = self.primary_account.get_open_positions()
-    #     self.assertIsInstance(trades, list)
-    #
+    def test_get_open_trades(self):
+        trades_response = self.primary_account.get_open_trades()
+        self.assertIsInstance(trades_response, requests.PreparedRequest)
+        self.assertIn('Authorization', trades_response.headers)
+        self.assertIn('Content-Type', trades_response.headers)
+        self.assertEqual(trades_response.headers['Authorization'], f'Bearer {self.api_key}')
+        self.assertEqual(trades_response.url, f'{self.base_url}/accounts/{self.account_id}/openTrades')
+        self.assertEqual(trades_response.method, 'GET')
+        self.assertIsNone(trades_response.body)
+
     # def test_close_trade(self):
     #     c_trade_req = self.primary_account.close_trade('0000')
     #     self.assertIsInstance(c_trade_req, dict)
