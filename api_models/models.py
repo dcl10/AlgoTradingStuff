@@ -77,12 +77,21 @@ class Account:
 
     def close_position(self, instrument: str, long: bool):
         """
-        This method closes the position for the provided instrument
-        :param instrument:
-        :param long:
-        :return:
+        This method makes a request to close the position for the provided instrument
+        :param instrument: The instrument to close position
+        :param long: True to close longPosition, False to close shortPosition
+        :returns: requests.PreparedRequest
         """
-        pass
+        if long:
+            data = {'longUnits': 'ALL'}
+        else:
+            data = {'shortUnits': 'ALL'}
+        req = requests.Request(url=f'{self.base_url}/accounts/{self.id}/positions/{instrument}/close',
+                               headers={'Authorization': f'Bearer {self.api_key}',
+                                        'Content-Type': 'application/json'},
+                               method='PUT',
+                               json=data)
+        return req.prepare()
 
     def get_open_trades(self):
         """
