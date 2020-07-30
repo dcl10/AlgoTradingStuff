@@ -108,9 +108,13 @@ class Account:
         """
         This method closes a trade with the provided trade specifier
         :param trade_specifier:
-        :return:
+        :returns: requests.PreparedRequest
         """
-        pass
+        req = requests.Request(url=f'{self.base_url}/accounts/{self.id}/trades/{trade_specifier}/close',
+                               headers={'Authorization': f'Bearer {self.api_key}',
+                                        'Content-Type': 'application/json'},
+                               method='PUT')
+        return req.prepare()
 
     def get_candles(self, instrument: str, start: str = '', end: str = '', price: str = 'M',
                     granularity: str = 'M1', count: int = 500):
