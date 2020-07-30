@@ -82,10 +82,14 @@ class Account:
 
     def get_open_trades(self):
         """
-        This method gets all the open trades for the account
-        :return:
+        This method makes a request to get all the open trades for the account
+        :returns: requests.PreparedRequest
         """
-        pass
+        req = requests.Request(url=f'{self.base_url}/accounts/{self.id}/openTrades',
+                               headers={'Authorization': f'Bearer {self.api_key}',
+                                        'Content-Type': 'application/json'},
+                               method='GET')
+        return req.prepare()
 
     def close_trade(self, trade_specifier: str):
         """
