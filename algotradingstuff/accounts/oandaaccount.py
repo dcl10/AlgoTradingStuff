@@ -1,10 +1,10 @@
 import requests
 import os
 import datetime as dt
-from algotradingstuff.api_models.errors import AccountError
+from algotradingstuff.accounts.errors import AccountError
 
 
-class Account:
+class OandaAccount:
     """
     This class hold information about an OANDA account
     """
@@ -174,7 +174,7 @@ def get_accounts(api_key: str, base_url: str):
     :param base_url: base URL for the OANDA API
     :param api_key: The API key for your OANDA account
     :raises: AccountError
-    :returns: list[Account]
+    :returns: list[OandaAccount]
     """
     response = requests.get(f'{base_url}/accounts',
                             headers={'Authorization': f'Bearer {api_key}'})
@@ -183,7 +183,7 @@ def get_accounts(api_key: str, base_url: str):
     accounts = response.json().get('accounts', [])
     response.close()
     if accounts:
-        return [Account(api_key, base_url, **account) for account in accounts]
+        return [OandaAccount(api_key, base_url, **account) for account in accounts]
     else:
         raise AccountError(f'no accounts found.' + os.linesep + f'Reason {reason}' + os.linesep +
                            f'Code {code}')
@@ -196,7 +196,7 @@ def get_account(account_id: str, api_key: str, base_url: str):
     :param api_key: the API for your OANDA primary_account
     :param base_url: base URL for the OANDA API
     :raises: AccountError
-    :returns: Account
+    :returns: OandaAccount
     """
     response = requests.get(f'{base_url}/accounts/{account_id}',
                             headers={'Authorization': f'Bearer {api_key}'})
@@ -205,7 +205,7 @@ def get_account(account_id: str, api_key: str, base_url: str):
     account = response.json().get('account', {})
     response.close()
     if account != {}:
-        return Account(api_key, base_url, **account)
+        return OandaAccount(api_key, base_url, **account)
     else:
         raise AccountError(f'failed to get account with ID: {account_id}.' + os.linesep +
                            f'Reason {reason}' + os.linesep + f'Code {code}')

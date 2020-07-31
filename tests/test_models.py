@@ -2,8 +2,8 @@ import unittest
 import configparser
 import requests
 import datetime as dt
-from algotradingstuff.api_models import Account, get_accounts, get_account
-from algotradingstuff.api_models import AccountError
+from algotradingstuff.accounts import OandaAccount, get_accounts, get_account
+from algotradingstuff.accounts import AccountError
 
 
 class TestAccount(unittest.TestCase):
@@ -19,7 +19,7 @@ class TestAccount(unittest.TestCase):
         acc = response.json().get('account', {})
         self.last_transaction = response.json().get('lastTransactionID', '')
         response.close()
-        self.primary_account = Account(self.api_key, self.base_url, **acc)
+        self.primary_account = OandaAccount(self.api_key, self.base_url, **acc)
 
     def test_create_order(self):
         new_order = {'order': {'type': 'MARKET',
@@ -150,13 +150,13 @@ class TestStaticMethods(unittest.TestCase):
     def test_get_accounts(self):
         accounts = get_accounts(self.api_key, self.base_url)
         self.assertIsInstance(accounts, list)
-        self.assertIsInstance(accounts[0], Account)
+        self.assertIsInstance(accounts[0], OandaAccount)
         self.assertIn('id', accounts[0].__dict__)
         self.assertRaises(AccountError, get_accounts, 'iiwfojwfjowsjfw', self.base_url)
 
     def test_get_account(self):
         account = get_account(self.primary_account, self.api_key, self.base_url)
-        self.assertIsInstance(account, Account)
+        self.assertIsInstance(account, OandaAccount)
         self.assertIn('balance', account.__dict__)
         self.assertRaises(AccountError, get_account, 'sifjowsefjwesfj', self.api_key, self.base_url)
 

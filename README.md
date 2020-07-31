@@ -1,11 +1,12 @@
 # AlgoTradingStuff
-This package aims to provide an easy way to interact with the OANDA v20 API
-to trade currency pairs and other commodities, such as gold and silver.
+This package aims to provide an easy way to interact with APIs of various
+trading platforms. Currently it offers some limited support for interacting
+with the OANDA v20 API.
 
-Right now the `Account` class is by no means feature complete, but you can:
+Right now the `OandaAccount` class is by no means feature complete, but you can:
 - Search all sub-accounts linked to your OANDA account
-- Create `Account` objects based on your sub-accounts
-- Use the `Account` objects to raise requests to:
+- Create `OandaAccount` objects based on your sub-accounts
+- Use the `OandaAccount` objects to raise requests to:
     - create and cancel orders
     - view and close your open positions
     - view and close open trades
