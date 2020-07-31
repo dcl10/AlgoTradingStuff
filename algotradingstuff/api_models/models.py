@@ -1,7 +1,7 @@
 import requests
 import os
 import datetime as dt
-from algotradingstuff.api_models import AccountError
+from algotradingstuff.api_models.errors import AccountError
 
 
 class Account:
