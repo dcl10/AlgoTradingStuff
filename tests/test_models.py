@@ -1,10 +1,9 @@
 import unittest
 import configparser
 import requests
-import json
 import datetime as dt
-from api_models.models import Account, get_accounts, get_account
-from api_models.errors import AccountError
+from algotradingstuff.api_models import Account, get_accounts, get_account
+from algotradingstuff.api_models import AccountError
 
 
 class TestAccount(unittest.TestCase):

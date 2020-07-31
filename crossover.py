@@ -3,7 +3,7 @@ import configparser
 import argparse
 import datetime as dt
 import pandas as pd
-from api_models.models import get_account, Account
+from algotradingstuff.api_models import get_account, Account
 from backtest.backtest import BackTester
 from strategies.strategies import CrossOverStrategy, vals_from_candles, check_time
 
