@@ -1,5 +1,5 @@
 import unittest
-import configparser
+import os
 import requests
 import datetime as dt
 from algotradingstuff.accounts import OandaAccount, get_accounts, get_account
@@ -9,11 +9,9 @@ from algotradingstuff.accounts import AccountError
 class TestAccount(unittest.TestCase):
 
     def setUp(self) -> None:
-        parser = configparser.ConfigParser()
-        parser.read('oanda.txt')
-        self.api_key = parser['oanda'].get('api_key')
-        self.account_id = parser['oanda'].get('primary_account')
-        self.base_url = parser['oanda'].get('base_url')
+        self.api_key = os.getenv('API_KEY')
+        self.account_id = os.getenv('ACCOUNT_ID')
+        self.base_url = os.getenv('BASE_URL')
         response = requests.get(f'{self.base_url}/accounts/{self.account_id}',
                                 headers={'Authorization': f'Bearer {self.api_key}'})
         acc = response.json().get('account', {})
@@ -145,11 +143,9 @@ class TestAccount(unittest.TestCase):
 class TestStaticMethods(unittest.TestCase):
 
     def setUp(self) -> None:
-        parser = configparser.ConfigParser()
-        parser.read('oanda.txt')
-        self.api_key = parser['oanda'].get('api_key')
-        self.primary_account = parser['oanda'].get('primary_account')
-        self.base_url = parser['oanda'].get('base_url')
+        self.api_key = os.getenv('API_KEY')
+        self.account_id = os.getenv('ACCOUNT_ID')
+        self.base_url = os.getenv('BASE_URL')
 
     def test_get_accounts(self):
         accounts = get_accounts(self.api_key, self.base_url)
