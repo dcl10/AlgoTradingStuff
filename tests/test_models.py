@@ -137,6 +137,10 @@ class TestAccount(unittest.TestCase):
         self.assertTrue(self.primary_account.update_account_state(self.last_transaction))
         self.assertRaises(AccountError, self.primary_account.update_account_state, '0000')
 
+    def test_update_account_changes(self):
+        self.assertTrue(self.primary_account.update_account_changes(self.last_transaction))
+        self.assertRaises(AccountError, self.primary_account.update_account_changes, '0000')
+
 
 class TestStaticMethods(unittest.TestCase):
 

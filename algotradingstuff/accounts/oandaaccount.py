@@ -22,6 +22,13 @@ class OandaAccount:
         self.__dict__.update(kwargs)
 
     def update_account_state(self, last_transaction_id: str):
+        """
+        Update the information about the account's price dependent state since the most
+        recent transaction.
+        :param last_transaction_id: The ID of the most recent transaction
+        :returns: bool
+        :raises: AccountError
+        """
         response = requests.get(f'{self.base_url}/accounts/{self.id}/changes',
                                 headers={'Authorization': f'Bearer {self.api_key}',
                                          'Content-Type': 'application/json'},
@@ -35,6 +42,29 @@ class OandaAccount:
             return True
         else:
             raise AccountError(f'failed to update state of account with ID: {self.id}.' + os.linesep +
+                               f'Reason {reason}' + os.linesep + f'Code {code}')
+
+    def update_account_changes(self, last_transaction_id: str):
+        """
+        Update the account with changes to orders, trades, positions and balance since the most
+        recent transaction.
+        :param last_transaction_id: The ID of the most recent transaction
+        :returns: bool
+        :raises: AccountError
+        """
+        response = requests.get(f'{self.base_url}/accounts/{self.id}/changes',
+                                headers={'Authorization': f'Bearer {self.api_key}',
+                                         'Content-Type': 'application/json'},
+                                params={'sinceTransactionID': last_transaction_id})
+        code = response.status_code
+        reason = response.reason
+        changes = response.json().get('changes', {})
+        response.close()
+        if changes != {}:
+            self.__dict__.update(**changes)
+            return True
+        else:
+            raise AccountError(f'failed to update changes of account with ID: {self.id}.' + os.linesep +
                                f'Reason {reason}' + os.linesep + f'Code {code}')
 
     def create_order(self, data: dict):
