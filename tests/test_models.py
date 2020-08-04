@@ -155,7 +155,7 @@ class TestStaticMethods(unittest.TestCase):
         self.assertRaises(AccountError, get_accounts, 'iiwfojwfjowsjfw', self.base_url)
 
     def test_get_account(self):
-        account = get_account(self.primary_account, self.api_key, self.base_url)
+        account = get_account(self.account_id, self.api_key, self.base_url)
         self.assertIsInstance(account, OandaAccount)
         self.assertIn('balance', account.__dict__)
         self.assertRaises(AccountError, get_account, 'sifjowsefjwesfj', self.api_key, self.base_url)
