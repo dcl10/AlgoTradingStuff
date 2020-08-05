@@ -5,7 +5,7 @@ with open('README.md', 'r') as fh:
 
 setup(
     name="algotradingstuff",
-    version="0.1",
+    version="0.1.1",
     author="dcl10_pypi",
     description="A package to interact with the OANDA v20 API",
     long_description=long_description,
