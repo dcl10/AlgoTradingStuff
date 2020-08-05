@@ -125,11 +125,13 @@ class TestAccount(unittest.TestCase):
         self.assertIn(start_ts, candles_request.url)
         self.assertIn(end_ts, candles_request.url)
         self.assertIn(instrument, candles_request.url)
+        self.assertEqual(candles_request.method, 'GET')
         one_candle_request = self.primary_account.get_candles(instrument, count=count)
         self.assertIsInstance(one_candle_request, requests.PreparedRequest)
         self.assertIn(instrument, one_candle_request.url)
         self.assertNotIn('from', one_candle_request.url)
         self.assertNotIn('to', one_candle_request.url)
+        self.assertEqual(one_candle_request.method, 'GET')
 
     def test_update_account_state(self):
         self.assertTrue(self.primary_account.update_account_state(self.last_transaction))
