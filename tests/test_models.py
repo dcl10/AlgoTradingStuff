@@ -125,11 +125,13 @@ class TestAccount(unittest.TestCase):
         self.assertIn(start_ts, candles_request.url)
         self.assertIn(end_ts, candles_request.url)
         self.assertIn(instrument, candles_request.url)
+        self.assertEqual(candles_request.method, 'GET')
         one_candle_request = self.primary_account.get_candles(instrument, count=count)
         self.assertIsInstance(one_candle_request, requests.PreparedRequest)
         self.assertIn(instrument, one_candle_request.url)
         self.assertNotIn('from', one_candle_request.url)
         self.assertNotIn('to', one_candle_request.url)
+        self.assertEqual(one_candle_request.method, 'GET')
 
     def test_update_account_state(self):
         self.assertTrue(self.primary_account.update_account_state(self.last_transaction))
@@ -138,6 +140,32 @@ class TestAccount(unittest.TestCase):
     def test_update_account_changes(self):
         self.assertTrue(self.primary_account.update_account_changes(self.last_transaction))
         self.assertRaises(AccountError, self.primary_account.update_account_changes, '0000')
+
+    def test_get_transactions(self):
+        start = (dt.datetime.today() - dt.timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S')
+        start_ts = str(dt.datetime.strptime(start, '%Y-%m-%d %H:%M:%S').timestamp())
+        end = dt.datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+        end_ts = str(dt.datetime.strptime(end, '%Y-%m-%d %H:%M:%S').timestamp())
+        no_date_request = self.primary_account.get_transactions()
+        self.assertIsInstance(no_date_request, requests.PreparedRequest)
+        self.assertEqual(no_date_request.method, 'GET')
+        from_request = self.primary_account.get_transactions(start=start)
+        self.assertIsInstance(from_request, requests.PreparedRequest)
+        self.assertIn('from', from_request.url)
+        self.assertIn(start_ts, from_request.url)
+        self.assertEqual(from_request.method, 'GET')
+        to_request = self.primary_account.get_transactions(end=end)
+        self.assertIsInstance(to_request, requests.PreparedRequest)
+        self.assertIn('to', to_request.url)
+        self.assertIn(end_ts, to_request.url)
+        self.assertEqual(to_request.method, 'GET')
+        from_to_request = self.primary_account.get_transactions(start=start, end=end)
+        self.assertIsInstance(from_to_request, requests.PreparedRequest)
+        self.assertIn('from', from_to_request.url)
+        self.assertIn('to', from_to_request.url)
+        self.assertEqual(from_to_request.method, 'GET')
+        self.assertIn(start_ts, from_to_request.url)
+        self.assertIn(end_ts, from_to_request.url)
 
 
 class TestStaticMethods(unittest.TestCase):

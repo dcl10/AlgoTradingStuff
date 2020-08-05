@@ -174,27 +174,68 @@ class OandaAccount:
                                    headers={'Authorization': f'Bearer {self.api_key}',
                                             'Accept-Datetime-Format': 'UNIX'},
                                    params={'granularity': granularity, 'price': price,
-                                           'from': start, 'to': end})
+                                           'from': start, 'to': end},
+                                   method='GET')
         elif start == '' and end != '':
             end = dt.datetime.strptime(end, '%Y-%m-%d %H:%M:%S').timestamp()
             req = requests.Request(url=f'{self.base_url}/accounts/{self.id}/instruments/{instrument}/candles',
                                    headers={'Authorization': f'Bearer {self.api_key}',
                                             'Accept-Datetime-Format': 'UNIX'},
                                    params={'granularity': granularity, 'price': price,
-                                           'to': end, 'count': count})
+                                           'to': end, 'count': count},
+                                   method='GET')
         elif end == '' and start != '':
             start = dt.datetime.strptime(start, '%Y-%m-%d %H:%M:%S').timestamp()
             req = requests.Request(url=f'{self.base_url}/accounts/{self.id}/instruments/{instrument}/candles',
                                    headers={'Authorization': f'Bearer {self.api_key}',
                                             'Accept-Datetime-Format': 'UNIX'},
                                    params={'granularity': granularity, 'price': price,
-                                           'from': start, 'count': count})
+                                           'from': start, 'count': count},
+                                   method='GET')
         else:
             req = requests.Request(url=f'{self.base_url}/accounts/{self.id}/instruments/{instrument}/candles',
                                    headers={'Authorization': f'Bearer {self.api_key}',
                                             'Accept-Datetime-Format': 'UNIX'},
                                    params={'granularity': granularity, 'price': price,
-                                           'count': count})
+                                           'count': count},
+                                   method='GET')
+        return req.prepare()
+
+    def get_transactions(self, start: str = '', end: str = ''):
+        """
+        Make a request to get the transactions for the account. If `start` and `end` are blank,
+        it will request all transactions since the account creation to the most recent transaction.
+        :param start: a date string, in the format 'yyyy-mm-dd hh:mm:ss', for the start point of your search
+        :param end: a date string, in the format 'yyyy-mm-dd hh:mm:ss', for the end point of your search
+        :returns: requests.PreparedRequest
+        """
+        if start != '' and end != '':
+            start = dt.datetime.strptime(start, '%Y-%m-%d %H:%M:%S').timestamp()
+            end = dt.datetime.strptime(end, '%Y-%m-%d %H:%M:%S').timestamp()
+            req = requests.Request(url=f'{self.base_url}/accounts/{self.id}/transactions',
+                                   headers={'Authorization': f'Bearer {self.api_key}',
+                                            'Accept-Datetime-Format': 'UNIX'},
+                                   params={'from': start, 'to': end},
+                                   method='GET')
+        elif start == '' and end != '':
+            end = dt.datetime.strptime(end, '%Y-%m-%d %H:%M:%S').timestamp()
+            req = requests.Request(url=f'{self.base_url}/accounts/{self.id}/transactions',
+                                   headers={'Authorization': f'Bearer {self.api_key}',
+                                            'Accept-Datetime-Format': 'UNIX'},
+                                   params={'to': end},
+                                   method='GET')
+        elif end == '' and start != '':
+            start = dt.datetime.strptime(start, '%Y-%m-%d %H:%M:%S').timestamp()
+            req = requests.Request(url=f'{self.base_url}/accounts/{self.id}/transactions',
+                                   headers={'Authorization': f'Bearer {self.api_key}',
+                                            'Accept-Datetime-Format': 'UNIX'},
+                                   params={'from': start},
+                                   method='GET')
+        else:
+            req = requests.Request(url=f'{self.base_url}/accounts/{self.id}/transactions',
+                                   headers={'Authorization': f'Bearer {self.api_key}',
+                                            'Accept-Datetime-Format': 'UNIX'},
+                                   method='GET')
         return req.prepare()
 
 
